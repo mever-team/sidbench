@@ -6,6 +6,7 @@ from .knn_models import KnnModel
 
 VALID_MODELS = ['linear', 'svm', 'knn']
 
+
 BACKBONE_VALID_NAMES = [
     'Imagenet:resnet18',
     'Imagenet:resnet34',
@@ -66,38 +67,42 @@ def get_model(classifier, backbone, ckpt):
 
 
 
-
-
 MODELS = [
     {
         'name': 'ojha2022',
+        'trained_on': 'progan',
         'classifier': 'linear',
         'backbone': 'CLIP:ViT-L/14',
         'ckpt': './pretrained_weights/ojha2022/fc_weights.pth',
     },
     {
         'name': 'wang2020',
+        'trained_on': 'progan',
         'classifier': 'linear',
         'backbone': 'Imagenet:resnet50',
         'ckpt': './pretrained_weights/wang2020/blur_jpg_prob0.5.pth',
     },
     {
         'name': 'corvi2022_latent',
+        'trained_on': 'latent_diffusion',
         'classifier': 'linear',
         'backbone': 'Imagenet:resnet50nodown',
-        'ckpt': './pretrained_weights/corvi2022/latent_model_epoch_best.pth',
+        'ckpt': './pretrained_weights/corvi2022/latent_model.pth',
     },
     {
         'name': 'corvi2022_progan',
+        'trained_on': 'progan',
         'classifier': 'linear',
         'backbone': 'Imagenet:resnet50nodown',
-        'ckpt': './pretrained_weights/corvi2022/progan_model_epoch_best.pth',
+        'ckpt': './pretrained_weights/corvi2022/progan_model.pth',
     },
     {
         'name': 'grag2021_stylegan2',
+        'trained_on': 'stylegan2',
         'classifier': 'linear',
         'backbone': 'Imagenet:resnet50nodown',
         'ckpt': './pretrained_weights/grag2021/gandetection_resnet50nodown_stylegan2.pth',
     }
+
 ]
 
