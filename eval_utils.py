@@ -5,29 +5,6 @@ from sklearn.metrics import confusion_matrix, roc_curve, precision_recall_curve
 import numpy as np
 
 
-def find_best_threshold(y_true, y_pred):
-    "We assume first half is real 0, and the second half is fake 1"
-
-    N = y_true.shape[0]
-
-    if y_pred[0:N//2].max() <= y_pred[N//2:N].min(): # perfectly separable case
-        return (y_pred[0:N//2].max() + y_pred[N//2:N].min()) / 2 
-
-    best_acc = 0 
-    best_thres = 0 
-    for thres in y_pred:
-        temp = deepcopy(y_pred)
-        temp[temp>=thres] = 1 
-        temp[temp<thres] = 0 
-
-        acc = (temp == y_true).sum() / N  
-        if acc >= best_acc:
-            best_thres = thres
-            best_acc = acc 
-    
-    return best_thres
-
-
 def find_best_acc_threshold(y_true, y_pred):
     thresholds = np.linspace(0, 1, 100)
     best_accuracy = 0

@@ -1,108 +1,49 @@
-from .clip_models import CLIPModel
-from .imagenet_models import ImagenetModel
-from .svm_models import SvmModel
-from .knn_models import KnnModel
+from models.CNNDetect import CNNDetect
+from models.FreDetect import FreDetect
+from models.RPTC import Net as RPTCNet
+from models.PSM import PSM
+from models.UnivFD import UnivFD
+from models.GramNet import GramNet
+from models.Rine import RineModel
+from models.LGrad import LGrad
 
 
-VALID_MODELS = ['linear', 'svm', 'knn']
+VALID_MODELS = ['CNNDetect', 'FreDetect', 'Fusing', 'GramNet', 'LGrad', 'UnivFD', 'RPTC', 'Rine']
 
 
-BACKBONE_VALID_NAMES = [
-    'Imagenet:resnet18',
-    'Imagenet:resnet34',
-    'Imagenet:resnet50',
-    'Imagenet:resnet50nodown',
-    'Imagenet:resnet101',
-    'Imagenet:resnet152',
-    'Imagenet:vgg11',
-    'Imagenet:vgg19',
-    'Imagenet:swin-b',
-    'Imagenet:swin-s',
-    'Imagenet:swin-t',
-    'Imagenet:vit_b_16',
-    'Imagenet:vit_b_32',
-    'Imagenet:vit_l_16',
-    'Imagenet:vit_l_32',
-    'CLIP:RN50', 
-    'CLIP:RN101', 
-    'CLIP:RN50x4', 
-    'CLIP:RN50x16', 
-    'CLIP:RN50x64', 
-    'CLIP:ViT-B/32', 
-    'CLIP:ViT-B/16', 
-    'CLIP:ViT-L/14', 
-    'CLIP:ViT-L/14@336px',
-    'CLIP:ViT-H-14'
-]
-
-
-def get_model(classifier, backbone, ckpt):
+def get_model(model_name, ckpt, ncls=None):
     
-    assert classifier in VALID_MODELS
-    assert backbone in BACKBONE_VALID_NAMES
+    assert model_name in VALID_MODELS
     
-    if classifier == 'linear':
-        if backbone.startswith("Imagenet:"):
-            model = ImagenetModel(backbone[9:])
-            model.load_weights(ckpt)
-            model.eval()
-            return model
-        elif backbone.startswith("CLIP:"):
-            model =  CLIPModel(backbone[5:])  
-            model.load_weights(ckpt)
-            model.eval()
-            return model
-        else:
-            assert False 
-    elif classifier == 'knn':
-        if backbone.startswith("CLIP:"):
-            return KnnModel(clip_model=backbone[5:], classifier_model_file=ckpt)
-        else:
-            assert False
-    elif classifier == 'svm':
-        if backbone.startswith("CLIP:"):
-            return SvmModel(clip_model=backbone[5:], classifier_model_file=ckpt)
-        else:
-            assert False  
+    if model_name == 'CNNDetect':
+        model = CNNDetect()
+    elif model_name == 'FreDetect':
+        model = FreDetect()
+    elif model_name == 'Fusing':
+        model = PSM()
+    elif model_name == 'GramNet':
+        model = GramNet()
+    elif model_name == 'LGrad':
+        model = LGrad()
+    elif model_name == 'UnivFD':
+        model = UnivFD()
+    elif model_name == 'RPTC':
+        model = RPTCNet()
+    elif model_name == 'Rine':
+        if ncls == '1class':
+            nproj = 4
+            proj_dim = 1024
+        elif ncls == '2class':
+            nproj = 4
+            proj_dim = 128
+        elif ncls == '4class':
+            nproj = 2
+            proj_dim = 1024
+        elif ncls == "ldm":
+            nproj = 4
+            proj_dim = 1024
+        model = RineModel(backbone=("ViT-L/14", 1024), nproj=nproj, proj_dim=proj_dim)
 
-
-
-MODELS = [
-    {
-        'name': 'ojha2022',
-        'trained_on': 'progan',
-        'classifier': 'linear',
-        'backbone': 'CLIP:ViT-L/14',
-        'ckpt': './pretrained_weights/ojha2022/fc_weights.pth',
-    },
-    {
-        'name': 'wang2020',
-        'trained_on': 'progan',
-        'classifier': 'linear',
-        'backbone': 'Imagenet:resnet50',
-        'ckpt': './pretrained_weights/wang2020/blur_jpg_prob0.5.pth',
-    },
-    {
-        'name': 'corvi2022_latent',
-        'trained_on': 'latent_diffusion',
-        'classifier': 'linear',
-        'backbone': 'Imagenet:resnet50nodown',
-        'ckpt': './pretrained_weights/corvi2022/latent_model.pth',
-    },
-    {
-        'name': 'corvi2022_progan',
-        'trained_on': 'progan',
-        'classifier': 'linear',
-        'backbone': 'Imagenet:resnet50nodown',
-        'ckpt': './pretrained_weights/corvi2022/progan_model.pth',
-    },
-    {
-        'name': 'grag2021_stylegan2',
-        'trained_on': 'stylegan2',
-        'classifier': 'linear',
-        'backbone': 'Imagenet:resnet50nodown',
-        'ckpt': './pretrained_weights/grag2021/gandetection_resnet50nodown_stylegan2.pth',
-    }
-
-]
+    model.load_weights(ckpt=ckpt)
+    model.eval()
 

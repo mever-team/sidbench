@@ -219,3 +219,163 @@ DATASET_PATHS = [
         order=9
     ),
 ]
+
+
+LGRAD_DATASET_PATHS = [
+    dict(
+        real_path='/fssd8/user-data/manosetro/sid_bench/test/lgrad/wang2020/biggan/',   # Imagenet 
+        fake_path='/fssd8/user-data/manosetro/sid_bench/test/lgrad/wang2020/biggan/',
+        source='wang2020',
+        family='gan', # Unconditional GAN
+        key='biggan'
+    ),
+    dict(
+        real_path='/fssd8/user-data/manosetro/sid_bench/test/lgrad/wang2020/cyclegan',   
+        fake_path='/fssd8/user-data/manosetro/sid_bench/test/lgrad/wang2020/cyclegan',
+        source='wang2020',
+        family='gan',
+        key='cyclegan' # Conditional GAN
+    ),
+    dict(
+        real_path='/fssd8/user-data/manosetro/sid_bench/test/lgrad/wang2020/gaugan',    # It is COCO 
+        fake_path='/fssd8/user-data/manosetro/sid_bench/test/lgrad/wang2020/gaugan',
+        source='wang2020',
+        family='gan', # Conditional GAN
+        key='gaugan'
+    ),
+    dict(
+        real_path='/fssd8/user-data/manosetro/sid_bench/test/lgrad/wang2020/progan',     
+        fake_path='/fssd8/user-data/manosetro/sid_bench/test/lgrad/wang2020/progan',
+        source='wang2020',
+        family='gan',
+        key='progan' # Unconditional GAN
+    ),
+    dict(
+        real_path='/fssd8/user-data/manosetro/sid_bench/test/lgrad/wang2020/stargan',  
+        fake_path='/fssd8/user-data/manosetro/sid_bench/test/lgrad/wang2020/stargan',
+        source='wang2020',
+        family='gan', # Conditional GAN
+        key='stargan'
+    ),
+    dict(
+        real_path='/fssd8/user-data/manosetro/sid_bench/test/lgrad/wang2020/stylegan',    
+        fake_path='/fssd8/user-data/manosetro/sid_bench/test/lgrad/wang2020/stylegan',
+        source='wang2020',
+        family='gan', # Unconditional GAN
+        key='stylegan' 
+    ),
+    dict(
+        real_path='/fssd8/user-data/manosetro/sid_bench/test/lgrad/wang2020/stylegan2',    
+        fake_path='/fssd8/user-data/manosetro/sid_bench/test/lgrad/wang2020/stylegan2',
+        source='wang2020',
+        family='gan',
+        key='stylegan2'
+    ),
+    dict(
+        real_path='/fssd8/user-data/manosetro/sid_bench/test/lgrad/wang2020/deepfake',   
+        fake_path='/fssd8/user-data/manosetro/sid_bench/test/lgrad/wang2020/deepfake',
+        source='wang2020', 
+        family='deepfake', # FaceForensics++
+        key='deepfake'
+    ),
+    dict(
+        real_path='/fssd8/user-data/manosetro/sid_bench/test/lgrad/wang2020/crn',   # Images from some video games
+        fake_path='/fssd8/user-data/manosetro/sid_bench/test/lgrad/wang2020/crn',
+        source='wang2020',
+        family='perceptual_loss',
+        key='crn'
+    ),
+    dict(
+        real_path='/fssd8/user-data/manosetro/sid_bench/test/lgrad/wang2020/imle',   # Images from some video games
+        fake_path='/fssd8/user-data/manosetro/sid_bench/test/lgrad/wang2020/imle',
+        source='wang2020',
+        family='perceptual_loss',
+        key='imle'
+    ),
+    dict(
+        real_path='/fssd8/user-data/manosetro/sid_bench/test/lgrad/wang2020/san',   
+        fake_path='/fssd8/user-data/manosetro/sid_bench/test/lgrad/wang2020/san',
+        source='wang2020',
+        family='low_level_vision',
+        key='san'
+    ),
+    dict(
+        real_path='/fssd8/user-data/manosetro/sid_bench/test/lgrad/wang2020/whichfaceisreal',
+        fake_path='/fssd8/user-data/manosetro/sid_bench/test/lgrad/wang2020/whichfaceisreal',
+        source='wang2020',
+        family='gan', # StyleGAN 
+        key='whichfaceisreal'
+    ),
+    dict(
+        real_path='/fssd8/user-data/manosetro/sid_bench/test/lgrad/synthbuster/raise',
+        fake_path='/fssd8/user-data/manosetro/sid_bench/test/lgrad/synthbuster/glide/',  
+        source='synthbuster',
+        family='diffusion',
+        key='glide',
+        order=1
+    ),
+    dict(
+        real_path='/fssd8/user-data/manosetro/sid_bench/test/lgrad/synthbuster/raise',
+        fake_path='/fssd8/user-data/manosetro/sid_bench/test/lgrad/synthbuster/dalle2/',
+        source='synthbuster',
+        family='diffusion',
+        key='dalle2',
+        order=2
+    ),
+    dict(
+        real_path='/fssd8/user-data/manosetro/sid_bench/test/lgrad/synthbuster/raise',
+        fake_path='/fssd8/user-data/manosetro/sid_bench/test/lgrad/synthbuster/stable-diffusion-1-3/',  
+        source='synthbuster',
+        family='diffusion',
+        key='stable-diffusion-1-3',
+        order=3
+    ),
+    dict(
+        real_path='/fssd8/user-data/manosetro/sid_bench/test/lgrad/synthbuster/raise',
+        fake_path='/fssd8/user-data/manosetro/sid_bench/test/lgrad/synthbuster/stable-diffusion-1-4/',  
+        source='synthbuster',
+        family='diffusion',
+        key='stable-diffusion-1-4',
+        order=4
+    ),
+    dict(
+        real_path='/fssd8/user-data/manosetro/sid_bench/test/lgrad/synthbuster/raise',
+        fake_path='/fssd8/user-data/manosetro/sid_bench/test/lgrad/synthbuster/midjourney-v5/',  
+        source='synthbuster',
+        family='diffusion',
+        key='midjourney-v5',
+        order=5
+    ),
+    dict(
+        real_path='/fssd8/user-data/manosetro/sid_bench/test/lgrad/synthbuster/raise',
+        fake_path='/fssd8/user-data/manosetro/sid_bench/test/lgrad/synthbuster/dalle3/',   
+        source='synthbuster',
+        family='diffusion',
+        key='dalle3',
+        order=6
+    ),
+    dict(
+        real_path='/fssd8/user-data/manosetro/sid_bench/test/lgrad/synthbuster/raise',
+        fake_path='/fssd8/user-data/manosetro/sid_bench/test/lgrad/synthbuster/stable-diffusion-2/',  
+        source='synthbuster',
+        family='diffusion',
+        key='stable-diffusion-2',
+        order=7
+    ),
+    dict(
+        real_path='/fssd8/user-data/manosetro/sid_bench/test/lgrad/synthbuster/raise',
+        fake_path='/fssd8/user-data/manosetro/sid_bench/test/lgrad/synthbuster/stable-diffusion-xl/',   
+        source='synthbuster',
+        family='diffusion',
+        key='stable-diffusion-xl',
+        order=8
+    ),
+    dict(
+        real_path='/fssd8/user-data/manosetro/sid_bench/test/lgrad/synthbuster/raise',
+        fake_path='/fssd8/user-data/manosetro/sid_bench/test/lgrad/synthbuster/firefly/',  
+        source='synthbuster',
+        family='diffusion',
+        key='firefly',
+        order=9
+    ),
+]

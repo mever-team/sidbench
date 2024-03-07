@@ -1,0 +1,9 @@
+glide: 79.58
+dalle2: 68.29
+stable-diffusion-1-3: 67.67
+stable-diffusion-1-4: 66.38
+midjourney-v5: 46.79
+dalle3: 15.76
+stable-diffusion-2: 82.88
+stable-diffusion-xl: 82.03
+firefly: 70.33

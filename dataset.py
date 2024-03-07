@@ -1,4 +1,6 @@
 import os
+import copy
+import cv2
 
 from io import BytesIO 
 from PIL import Image 
@@ -6,10 +8,16 @@ from PIL import ImageFile
 import numpy as np 
 
 from scipy.ndimage import gaussian_filter
+from scipy import fftpack
+
+import torch 
 import torchvision.transforms as transforms
+import torchvision.transforms.functional as F
+
 from torch.utils.data import Dataset
 
 import random
+from random import choice
 
 ImageFile.LOAD_TRUNCATED_IMAGES = True
 
@@ -45,15 +53,193 @@ def gaussian_blur(img, sigma):
     return Image.fromarray(img)
 
 
+rz_dict = {
+    'bilinear': Image.BILINEAR,
+    'bicubic': Image.BICUBIC,
+    'lanczos': Image.LANCZOS,
+    'nearest': Image.NEAREST
+}
+
+
+def custom_resize(img, opt):
+    interp = opt.rz_interp[0] if len(opt.rz_interp) == 1 else choice(opt.rz_interp)
+    return F.resize(img, opt.loadSize, interpolation=rz_dict[interp])
+
+
+def normalize(img):
+    img -= img.min()
+    if img.max() != 0: 
+        img /= img.max()
+    return img * 255. 
+
+
+def psm_processing(img, cropSize, resizeSize=None):
+    height, width = img.height, img.width
+
+    input_img = copy.deepcopy(img)
+    input_img = transforms.ToTensor()(input_img)
+    input_img = transforms.Normalize(MEAN['imagenet'], STD['imagenet'])(input_img)
+
+    if resizeSize is not None:
+        img = transforms.Resize(resizeSize)(img)
+
+    img = transforms.CenterCrop(cropSize)(img)
+    cropped_img = transforms.ToTensor()(img)
+    cropped_img = transforms.Normalize(MEAN['imagenet'], STD['imagenet'])(cropped_img)
+
+    scale = torch.tensor([height, width])
+
+    return input_img, cropped_img, scale
+
+
+def lgrad_processing(img, gen_model, device, cropSize):
+    transforms = transforms.Compose([
+        transforms.CenterCrop(cropSize),
+        transforms.ToTensor(),
+        transforms.Normalize(mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5])
+    ])
+
+    img_list = []
+    img_list.append(torch.unsqueeze(transforms(img), 0))
+    img = torch.cat(img_list, 0)
+    img_cuda = img.to(torch.float32)
+    img_cuda= img_cuda.to(device)
+    img_cuda.requires_grad = True
+    pre = gen_model(img_cuda)
+    gen_model.zero_grad()
+    grads = torch.autograd.grad(pre.sum(), img_cuda, create_graph=True, retain_graph=True, allow_unused=False)[0]
+    
+    for _, grad in enumerate(grads):
+        img_grad = normalize(grad.permute(1,2,0).cpu().detach().numpy())
+    
+    retval, buffer = cv2.imencode(".png", img_grad)
+    if retval:
+        img = Image.open(BytesIO(buffer)).convert('RGB')
+
+    return transforms.Compose([
+            transforms.CenterCrop(cropSize),
+            transforms.ToTensor(),
+            transforms.Normalize(mean=MEAN['imagenet'], std=STD['imagenet'])
+        ])(img)
+
+
+def cnnspot_processing(img, cropSize, resizeSize=None):
+    transformations = []
+
+    if resizeSize is not None:
+        transformations.append(transforms.Resize(size=(resizeSize, resizeSize)))
+
+    transformations.append(transforms.CenterCrop(cropSize))
+    transformations.append(transforms.ToTensor())
+    transformations.append(transforms.Normalize(mean=MEAN['imagenet'], std=STD['imagenet']))
+
+    transform = transforms.Compose(transformations)
+    
+    return transform(img)
+
+
+def unifd_processing(img, cropSize, resizeSize=None):
+    transformations = []
+
+    if resizeSize is not None:
+        transformations.append(transforms.Resize(size=(resizeSize, resizeSize)))
+
+    transformations.append(transforms.CenterCrop(cropSize))
+    transformations.append(transforms.ToTensor())
+    transformations.append(transforms.Normalize(mean=MEAN['clip'], std=STD['clip']))
+
+    transform = transforms.Compose(transformations)
+    
+    return transform(img)
+
+
+def dct2_wrapper(image, mean, var, log=True, epsilon=1e-12):
+    """ apply 2d-DCT to image of shape (H, W, C) uint8 """
+    # dct
+    image = np.array(image)
+    image = fftpack.dct(image, type=2, norm="ortho", axis=0)
+    image = fftpack.dct(image, type=2, norm="ortho", axis=1)
+    # log scale
+    if log:
+        image = np.abs(image)
+        image = np.log(image + epsilon)
+
+    # normalize
+    return (image - mean) / np.sqrt(var)
+
+
+def fredect_processing(img, dct_mean, dct_var, cropSize, resizeSize=None):
+    input_img = copy.deepcopy(img)
+    input_img = transforms.ToTensor()(input_img)
+    input_img = transforms.Normalize(mean=MEAN['imagenet'], std=STD['imagenet'])(input_img)
+
+    if resizeSize is not None:
+        img = transforms.Resize(resizeSize)(img)
+
+    img = transforms.CenterCrop(cropSize)(img)
+    
+    cropped_img = torch.from_numpy(dct2_wrapper(img, dct_mean, dct_var)).permute(2,0,1).to(dtype=torch.float)
+    
+    return cropped_img
+
+
+def processing_RPTC(img, cropSize, patch_num):
+    num_block = int(pow(2, patch_num))
+    patchsize = int(cropSize / num_block)
+    randomcrop = transforms.RandomCrop(patchsize)
+    
+    minsize = min(img.size)
+    if minsize < patchsize:
+        img = transforms.Resize((patchsize,patchsize))(img)
+    
+    img = transforms.ToTensor()(img)
+
+    imgori = img.clone().unsqueeze(0)
+    img_template = torch.zeros(3, cropSize, cropSize)
+    img_crops = []
+    for i in range(num_block * num_block * 3):
+        cropped_img = randomcrop(img)
+        texture_rich = ED(cropped_img)
+        img_crops.append([cropped_img, texture_rich])
+
+    img_crops = sorted(img_crops, key=lambda x:x[1])
+
+    count = 0
+    for ii in range(num_block):
+        for jj in range(num_block):
+            img_template[:,ii*patchsize:(ii+1)*patchsize,jj*patchsize:(jj+1)*patchsize] = img_crops[count][0]
+            count += 1
+    img_poor = img_template.clone().unsqueeze(0)
+
+    count = -1
+    for ii in range(num_block):
+        for jj in range(num_block):
+            img_template[:,ii*patchsize:(ii+1)*patchsize,jj*patchsize:(jj+1)*patchsize] = img_crops[count][0]
+            count -= 1
+    img_rich = img_template.clone().unsqueeze(0)
+    img = torch.cat((img_poor,img_rich),0)
+    
+    return img
+
+
+def ED(img):
+    r1, r2 = img[:, 0:-1, :], img[:, 1::, :]
+    r3, r4 = img[:, :, 0:-1], img[:, :, 1::]
+    r5, r6 = img[:, 0:-1, 0:-1], img[:, 1::, 1::]
+    r7, r8 = img[:, 0:-1, 1::], img[:, 1::, 0:-1]
+    s1 = torch.sum(torch.abs(r1 - r2)).item()
+    s2 = torch.sum(torch.abs(r3 - r4)).item()
+    s3 = torch.sum(torch.abs(r5 - r6)).item()
+    s4 = torch.sum(torch.abs(r7 - r8)).item() 
+
+    return s1 + s2 + s3 + s4
+
+
 class SyntheticImageDetectionDataset(Dataset):
-    def __init__(self, data_paths, backbone, max_sample=None, is_train=False, jpeg_quality=None, gaussian_sigma=None):    
-        assert backbone.lower().split(':')[0] in ["imagenet", "clip"]
-        
-        self.backbone = backbone
+    def __init__(self, data_paths, max_sample=None, jpeg_quality=None, gaussian_sigma=None):    
+
         self.jpeg_quality = jpeg_quality
         self.gaussian_sigma = gaussian_sigma
-
-        self.is_train = is_train
 
         self.real_list, self.fake_list = self.read_paths(data_paths, max_sample)
         self.total_list = self.real_list + self.fake_list
@@ -64,25 +250,16 @@ class SyntheticImageDetectionDataset(Dataset):
             self.labels_dict[i] = 0
         for i in self.fake_list:
             self.labels_dict[i] = 1
-        
-        stat_from = "imagenet" if backbone.lower().startswith("imagenet") else "clip"
 
-        if is_train:
-            crop_func = transforms.RandomCrop(224)
-        else:
-            crop_func = transforms.CenterCrop(224)
+        # if is_train:
+        #     crop_func = transforms.RandomCrop(224)
+        # else:
+        #     crop_func = transforms.CenterCrop(224)
 
-        self.transform = transforms.Compose([
-            crop_func,
-            transforms.ToTensor(),
-            transforms.Normalize( mean=MEAN[stat_from], std=STD[stat_from] ),
-        ])
 
     def merge(self, other_dataset):
-        assert self.encoder == other_dataset.encoder
         assert self.jpeg_quality == other_dataset.jpeg_quality
         assert self.gaussian_sigma == other_dataset.gaussian_sigma
-        assert self.is_train == other_dataset.is_train
 
         self.total_list += other_dataset.total_list
         self.labels_dict.update(other_dataset.labels_dict)
@@ -90,10 +267,8 @@ class SyntheticImageDetectionDataset(Dataset):
         self.fake_list += other_dataset.fake_list
 
     def remove(self, other_dataset):
-        assert self.encoder == other_dataset.encoder
         assert self.jpeg_quality == other_dataset.jpeg_quality
         assert self.gaussian_sigma == other_dataset.gaussian_sigma
-        assert self.is_train == other_dataset.is_train
 
         for i in other_dataset.real_list:
             self.real_list.remove(i)
@@ -109,7 +284,6 @@ class SyntheticImageDetectionDataset(Dataset):
             self.labels_dict[i] = 0
         for i in self.fake_list:
             self.labels_dict[i] = 1
-
 
     def read_paths(self, paths, max_sample=None):
         real_list = []
@@ -158,74 +332,4 @@ class SyntheticImageDetectionDataset(Dataset):
         if self.jpeg_quality is not None:
             img = png2jpg(img, self.jpeg_quality)
 
-        img = self.transform(img)
-
         return img, label
-    
-
-import torch
-import time
-
-if __name__ == '__main__':
-     
-    base_path = '/fssd8/user-data/manosetro/sid_bench/test'
-
-    # real_path = os.path.join(base_path, 'ojha2023/laion')   
-    # fake_path = os.path.join(base_path, 'ojha2023/dalle') 
-
-    # /fssd8/user-data/manosetro/sid_bench/test/wang2020/biggan/
-    real_path = os.path.join(base_path, 'wang2020/biggan')
-    fake_path = os.path.join(base_path, 'wang2020/biggan')
-    full_dataset = SyntheticImageDetectionDataset([real_path, fake_path], backbone='CLIP:ViT-L/14', max_sample=150)
-    print('Full dataset: %i' % len(full_dataset))
-    print('%i real images' % full_dataset.real_len())
-    print('%i fake images' % full_dataset.fake_len())
-
-    train_size = int(0.8 * len(full_dataset))
-    test_size = len(full_dataset) - train_size
-    train_dataset, test_dataset = torch.utils.data.random_split(full_dataset, [train_size, test_size])
-
-    print('Train: %i' % len(train_dataset))
-    # print('Train: %i real images' % train_dataset.real_len())
-    # print('Train: %i fake images' % train_dataset.fake_len())
-
-    print('Test: %i' % len(test_dataset))
-    # print('Test: %i real images' % test_dataset.real_len())
-    # print('Test: %i fake images' % test_dataset.fake_len())
-
-    print(test_dataset.real_list[0:10])
-    loader = torch.utils.data.DataLoader(test_dataset, batch_size=16, shuffle=False, num_workers=4)
-    for img, label in loader:
-        print(label)
-
-#     print('-'*20)
-
-    # real_path = os.path.join(base_path, 'synthbuster/raise')   
-    # fake_path = os.path.join(base_path, 'synthbuster/dalle3') 
-    # dataset2 = SyntheticImageDetectionDataset(real_path, fake_path, encoder='CLIP:ViT-L/14', max_sample=100)
-    # print(len(dataset1))
-    # print('%i real images' % dataset1.real_len())
-    # print('%i fake images' % dataset1.fake_len())
-    # print('-'*20)
-
-    # dataset1.merge(dataset2)
-    # print(len(dataset1))
-    # print('%i real images' % dataset1.real_len())
-    # print('%i fake images' % dataset1.fake_len())
-    # print('-'*20)
-
-    # dataset1.remove(dataset2)
-    # print(len(dataset1))
-    # print('%i real images' % dataset1.real_len())
-    # print('%i fake images' % dataset1.fake_len())
-    # print('-'*20)
-
-    # loader = torch.utils.data.DataLoader(dataset1, batch_size=128, shuffle=False, num_workers=8)
-    # print ("Batches: %d" %(len(loader)))
-
-    # t1 = time.time()
-    # print ("Start iterating")
-    # for img, label in iter(loader):
-    #     print (img.shape)
-
-    # print ("Time: %f" %(time.time() - t1))

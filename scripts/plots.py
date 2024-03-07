@@ -44,7 +44,8 @@ def save_ap_auc_barchart(input_file_path, output_file_path, xlabel, trained_on=N
     if source is not None:
         data = [record for record in data if record['source'] == source]
 
-    # Extract AP and ROC AUC values
+    # Extract ACC, AP and ROC AUC values
+    acc_values = [record['threshold_05']['acc'] for record in data]
     ap_values = [record['ap'] for record in data]
     roc_auc_values = [record['roc_auc'] for record in data]
     indices = np.arange(len(data))  # The label locations
@@ -54,8 +55,9 @@ def save_ap_auc_barchart(input_file_path, output_file_path, xlabel, trained_on=N
 
     # Plot AP and ROC AUC values as bar charts
     fig, ax = plt.subplots(figsize=(12, 6))
-    ax.bar(indices - width/2, ap_values, width, label='AP', color=PALLETE['navy'])
-    ax.bar(indices + width/2, roc_auc_values, width, label='ROC AUC', color=PALLETE['teal'])
+    ax.bar(indices - width, acc_values, width, label='Acc', color=PALLETE['blue'])
+    ax.bar(indices, ap_values, width, label='AP', color=PALLETE['navy'])
+    ax.bar(indices + width, roc_auc_values, width, label='ROC AUC', color=PALLETE['teal'])
 
     title = '' if trained_on is None else 'Trained on: ' + trained_on + ' / '
     title += ' Test on: '
@@ -100,19 +102,22 @@ def save_acc_barchart(input_file_path, output_file_path, xlabel, trained_on=None
     if source is not None:
         data = [record for record in data if record['source'] == source]
 
-    # Extract AP and ROC AUC values
     acc_values = [record['threshold_05']['acc'] for record in data]
     oracle_acc_values = [record['oracle_threshold']['acc'] for record in data]
+    tpr_values = [record['oracle_threshold']['tpr'] for record in data]
+    tnr_values = [record['oracle_threshold']['tnr'] for record in data]
     indices = np.arange(len(data))  # The label locations
     
     # Bar chart parameters
-    width = 0.25  # the width of the bars
+    width = 0.15  # the width of the bars
 
     # Plot AP and ROC AUC values as bar charts
     fig, ax = plt.subplots(figsize=(12, 6))
-    ax.bar(indices - width/2, acc_values, width, label='Accuracy', color=PALLETE['navy'])
-    ax.bar(indices + width/2, oracle_acc_values, width, label='Oracle', color=PALLETE['teal'])
-
+    ax.bar(indices - 3*width/2, acc_values, width, label='Accuracy', color=PALLETE['navy'])
+    ax.bar(indices - width/2, oracle_acc_values, width, label='Oracle Accuracy', color=PALLETE['teal'])
+    ax.bar(indices + width/2, tpr_values, width, label='Oracle TPR', color=PALLETE['grey'])
+    ax.bar(indices + 3*width/2, tnr_values, width, label='Oracle TNR', color=PALLETE['blue'])
+    
     title = '' if trained_on is None else 'Trained on: ' + trained_on + ' / '
     title += ' Test on: '
     if family is None and source is None or family == 'All' and source == 'All':
@@ -147,7 +152,7 @@ def save_metrics_barchart(input_file_path, output_file_path, xlabel, trained_on=
     # Load the JSON data
     with open(input_file_path, 'r') as file:
         data = json.load(file)
-    
+
     if family is not None:
         data = [record for record in data if record['family'] == family]
     
@@ -199,7 +204,21 @@ def save_metrics_barchart(input_file_path, output_file_path, xlabel, trained_on=
     plt.close()
 
 
-# input_file_path = './baseline_results/ojha2022_linear/metrics.json'
+input_file_path = './test_results/tan2023_linear/_jpeg_None_gaussian_None/metrics.json'
+output_folder = './figs/' + Path(input_file_path).parent.parent.name
+print(output_folder)
+
+save_metrics_barchart(input_file_path, output_folder + '/metrics_lgrad.png', 'Dataset')
+save_acc_barchart(input_file_path, output_folder + '/oracle_acc_lgrad.png', 'Dataset')
+save_ap_auc_barchart(input_file_path, output_folder + '/ap_auc_lgrad.png', 'Dataset')
+
+save_metrics_barchart(input_file_path, output_folder + '/metrics_wang2020_lgrad.png', 'Dataset', family='gan', source='wang2020')
+save_acc_barchart(input_file_path, output_folder + '/oracle_acc_wang2020_lgrad.png', 'Dataset', family='gan', source='wang2020')
+save_ap_auc_barchart(input_file_path, output_folder + '/ap_auc_wang2020_lgrad.png', 'Dataset', family='gan', source='wang2020')
+
+save_metrics_barchart(input_file_path, output_folder + '/metrics_synthbuster_lgrad.png', 'Dataset', source='synthbuster')
+save_acc_barchart(input_file_path, output_folder + '/oracle_acc_synthbuster_lgrad.png', 'Dataset', source='synthbuster')
+save_ap_auc_barchart(input_file_path, output_folder + '/ap_auc_synthbuster_lgrad.png', 'Dataset', source='synthbuster')
 
 
 # for root, dirs, files in os.walk("./baseline_results", topdown=False):
@@ -242,18 +261,18 @@ def save_metrics_barchart(input_file_path, output_file_path, xlabel, trained_on=
 # save_ap_auc_barchart(avg_fl, 'figs/average_ap_auc_synthbuster.png', 'Models', family='diffusion', source='synthbuster')
 
 
-avg_fl = './result/ojha2022_linear/average_metrics.json'
-save_metrics_barchart(avg_fl, 'figs/transformations/average_metrics.png', 'Transformation', family='All', source='All')
-save_metrics_barchart(avg_fl, 'figs/transformations/average_metrics_gan.png', 'Transformation', family='gan', source='All')
-save_metrics_barchart(avg_fl, 'figs/transformations/average_metrics_diffusion.png', 'Transformation', family='diffusion', source='All')
-save_metrics_barchart(avg_fl, 'figs/transformations/average_metrics_synthbuster.png', 'Transformation', family='diffusion', source='synthbuster')
+# avg_fl = './result/ojha2022_linear/average_metrics.json'
+# save_metrics_barchart(avg_fl, 'figs/transformations/average_metrics.png', 'Transformation', family='All', source='All')
+# save_metrics_barchart(avg_fl, 'figs/transformations/average_metrics_gan.png', 'Transformation', family='gan', source='All')
+# save_metrics_barchart(avg_fl, 'figs/transformations/average_metrics_diffusion.png', 'Transformation', family='diffusion', source='All')
+# save_metrics_barchart(avg_fl, 'figs/transformations/average_metrics_synthbuster.png', 'Transformation', family='diffusion', source='synthbuster')
 
-save_acc_barchart(avg_fl, 'figs/transformations/average_oracle_acc.png', 'Transformation', family='All', source='All')
-save_acc_barchart(avg_fl, 'figs/transformations/average_oracle_acc_gan.png', 'Transformation', family='gan', source='All')
-save_acc_barchart(avg_fl, 'figs/transformations/average_oracle_acc_diffusion.png', 'Transformation', family='diffusion', source='All')
-save_acc_barchart(avg_fl, 'figs/transformations/average_oracle_acc_synthbuster.png', 'Transformation', family='diffusion', source='synthbuster')
+# save_acc_barchart(avg_fl, 'figs/transformations/average_oracle_acc.png', 'Transformation', family='All', source='All')
+# save_acc_barchart(avg_fl, 'figs/transformations/average_oracle_acc_gan.png', 'Transformation', family='gan', source='All')
+# save_acc_barchart(avg_fl, 'figs/transformations/average_oracle_acc_diffusion.png', 'Transformation', family='diffusion', source='All')
+# save_acc_barchart(avg_fl, 'figs/transformations/average_oracle_acc_synthbuster.png', 'Transformation', family='diffusion', source='synthbuster')
 
-save_ap_auc_barchart(avg_fl, 'figs/transformations/average_ap_auc.png', 'Transformation', family='All', source='All')
-save_ap_auc_barchart(avg_fl, 'figs/transformations/average_ap_auc_gan.png', 'Transformation', family='gan', source='All')
-save_ap_auc_barchart(avg_fl, 'figs/transformations/average_ap_auc_diffusion.png', 'Transformation', family='diffusion', source='All')
-save_ap_auc_barchart(avg_fl, 'figs/transformations/average_ap_auc_synthbuster.png', 'Transformation', family='diffusion', source='synthbuster')
+# save_ap_auc_barchart(avg_fl, 'figs/transformations/average_ap_auc.png', 'Transformation', family='All', source='All')
+# save_ap_auc_barchart(avg_fl, 'figs/transformations/average_ap_auc_gan.png', 'Transformation', family='gan', source='All')
+# save_ap_auc_barchart(avg_fl, 'figs/transformations/average_ap_auc_diffusion.png', 'Transformation', family='diffusion', source='All')
+# save_ap_auc_barchart(avg_fl, 'figs/transformations/average_ap_auc_synthbuster.png', 'Transformation', family='diffusion', source='synthbuster')
