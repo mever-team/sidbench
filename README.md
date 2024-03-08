@@ -8,7 +8,7 @@ This project is a framework for benchmarking several state-of-the-art synthetic 
 
 |method|paper|code|
 |:--------:|:------:|:------:|
-|[CNNDetect](https://github.com/peterwang512/CNNDetection)|CNN-generated images are surprisingly easy to spot...for now| |
+|CNNDetect|CNN-generated images are surprisingly easy to spot...for now| [:link:](https://github.com/peterwang512/CNNDetection) |
 |[FreDetect](https://github.com/RUB-SysSec/GANDCTAnalysis)|Leveraging Frequency Analysis for Deep Fake Image Recognition| |
 |[Fusing](https://github.com/littlejuyan/FusingGlobalandLocal)|Fusing global and local features for generalized AI-synthesized image detection| |
 |[GramNet](https://github.com/liuzhengzhe/Global_Texture_Enhancement_for_Fake_Face_Detection_in_the-Wild)|Global Texture Enhancement for Fake Face Detection In the Wild| |
