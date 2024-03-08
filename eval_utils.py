@@ -1,5 +1,3 @@
-from copy import deepcopy
-
 from sklearn.metrics import average_precision_score, accuracy_score, roc_auc_score
 from sklearn.metrics import confusion_matrix, roc_curve, precision_recall_curve
 import numpy as np
@@ -19,12 +17,12 @@ def find_best_acc_threshold(y_true, y_pred):
     return best_threshold
 
  
-def calculate_for_threshold(y_true, y_pred, thres):
-    r_acc = accuracy_score(y_true[y_true==0], y_pred[y_true==0] > thres)
-    f_acc = accuracy_score(y_true[y_true==1], y_pred[y_true==1] > thres)
-    acc = accuracy_score(y_true, y_pred > thres)
+def calculate_for_threshold(y_true, y_pred, threshold):
+    r_acc = accuracy_score(y_true[y_true==0], y_pred[y_true==0] > threshold)
+    f_acc = accuracy_score(y_true[y_true==1], y_pred[y_true==1] > threshold)
+    acc = accuracy_score(y_true, y_pred > threshold)
 
-    tn, fp, fn, tp = confusion_matrix(y_true, y_pred > thres).ravel()
+    tn, fp, fn, tp = confusion_matrix(y_true, y_pred > threshold).ravel()
 
     ppv = tp / (tp + fp) if (tp + fp) != 0 else 0  # Positive Predictive Value
     npv = tn / (tn + fn) if (tn + fn) != 0 else 0  # Negative Predictive Value
@@ -38,7 +36,7 @@ def calculate_for_threshold(y_true, y_pred, thres):
     }   
 
 
-def calculate_performance_metrics(y_true, y_pred, find_thres=False):
+def calculate_performance_metrics(y_true, y_pred, find_threshold=False):
 
     metrics = { }
 
@@ -54,7 +52,7 @@ def calculate_performance_metrics(y_true, y_pred, find_thres=False):
     # Acc based on 0.5
     metrics['threshold_05'] = calculate_for_threshold(y_true, y_pred, 0.5)
 
-    if not find_thres:
+    if not find_threshold:
         return metrics
 
     # Acc based on the best thres - oracle

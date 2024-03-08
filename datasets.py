@@ -4,154 +4,154 @@ DATASET_PATHS = [
         fake_path='/fssd8/user-data/manosetro/sid_bench/test/wang2020/biggan/',
         source='wang2020',
         family='gan', # Unconditional GAN
-        key='biggan'
+        generative_model='biggan'
     ),
     dict(
         real_path='/fssd8/user-data/manosetro/sid_bench/test/wang2020/cyclegan',   
         fake_path='/fssd8/user-data/manosetro/sid_bench/test/wang2020/cyclegan',
         source='wang2020',
         family='gan',
-        key='cyclegan' # Conditional GAN
+        generative_model='cyclegan' # Conditional GAN
     ),
     dict(
         real_path='/fssd8/user-data/manosetro/sid_bench/test/wang2020/gaugan',    # It is COCO 
         fake_path='/fssd8/user-data/manosetro/sid_bench/test/wang2020/gaugan',
         source='wang2020',
         family='gan', # Conditional GAN
-        key='gaugan'
+        generative_model='gaugan'
     ),
     dict(
         real_path='/fssd8/user-data/manosetro/sid_bench/test/wang2020/progan',     
         fake_path='/fssd8/user-data/manosetro/sid_bench/test/wang2020/progan',
         source='wang2020',
         family='gan',
-        key='progan' # Unconditional GAN
+        generative_model='progan' # Unconditional GAN
     ),
     dict(
         real_path='/fssd8/user-data/manosetro/sid_bench/test/wang2020/stargan',  
         fake_path='/fssd8/user-data/manosetro/sid_bench/test/wang2020/stargan',
         source='wang2020',
         family='gan', # Conditional GAN
-        key='stargan'
+        generative_model='stargan'
     ),
     dict(
         real_path='/fssd8/user-data/manosetro/sid_bench/test/wang2020/stylegan',    
         fake_path='/fssd8/user-data/manosetro/sid_bench/test/wang2020/stylegan',
         source='wang2020',
         family='gan', # Unconditional GAN
-        key='stylegan' 
+        generative_model='stylegan' 
     ),
     dict(
         real_path='/fssd8/user-data/manosetro/sid_bench/test/wang2020/stylegan2',    
         fake_path='/fssd8/user-data/manosetro/sid_bench/test/wang2020/stylegan2',
         source='wang2020',
         family='gan',
-        key='stylegan2'
+        generative_model='stylegan2'
     ),
     dict(
         real_path='/fssd8/user-data/manosetro/sid_bench/test/wang2020/deepfake',   
         fake_path='/fssd8/user-data/manosetro/sid_bench/test/wang2020/deepfake',
         source='wang2020', 
         family='deepfake', # FaceForensics++
-        key='deepfake'
+        generative_model='deepfake'
     ),
     dict(
         real_path='/fssd8/user-data/manosetro/sid_bench/test/wang2020/crn',   # Images from some video games
         fake_path='/fssd8/user-data/manosetro/sid_bench/test/wang2020/crn',
         source='wang2020',
         family='perceptual_loss',
-        key='crn'
+        generative_model='crn'
     ),
     dict(
         real_path='/fssd8/user-data/manosetro/sid_bench/test/wang2020/imle',   # Images from some video games
         fake_path='/fssd8/user-data/manosetro/sid_bench/test/wang2020/imle',
         source='wang2020',
         family='perceptual_loss',
-        key='imle'
+        generative_model='imle'
     ),
     dict(
         real_path='/fssd8/user-data/manosetro/sid_bench/test/wang2020/san',   
         fake_path='/fssd8/user-data/manosetro/sid_bench/test/wang2020/san',
         source='wang2020',
         family='low_level_vision',
-        key='san'
+        generative_model='san'
     ),
     dict(
         real_path='/fssd8/user-data/manosetro/sid_bench/test/wang2020/seeingdark',   
         fake_path='/fssd8/user-data/manosetro/sid_bench/test/wang2020/seeingdark',
         source='wang2020',
         family='low_level_vision',
-        key='sitd'
+        generative_model='sitd'
     ),
     dict(
         real_path='/fssd8/user-data/manosetro/sid_bench/test/wang2020/whichfaceisreal',
         fake_path='/fssd8/user-data/manosetro/sid_bench/test/wang2020/whichfaceisreal',
         source='wang2020',
         family='gan', # StyleGAN 
-        key='whichfaceisreal'
+        generative_model='whichfaceisreal'
     ),
     dict(
         real_path='/fssd8/user-data/manosetro/sid_bench/test/ojha2023/laion',
         fake_path='/fssd8/user-data/manosetro/sid_bench/test/ojha2023/dalle',
         source='ojha2023',
         family='diffusion', # auto-regressive 
-        key='dalle'
+        generative_model='dalle'
     ),
     dict(
         real_path='/fssd8/user-data/manosetro/sid_bench/test/ojha2023/laion',
         fake_path='/fssd8/user-data/manosetro/sid_bench/test/ojha2023/glide_100_10',
         source='ojha2023',
         family='diffusion',
-        key='glide_100_10'
+        generative_model='glide_100_10'
     ),
     dict(
         real_path='/fssd8/user-data/manosetro/sid_bench/test/ojha2023/laion',
         fake_path='/fssd8/user-data/manosetro/sid_bench/test/ojha2023/glide_100_27',
         source='ojha2023',
         family='diffusion',
-        key='glide_100_27'
+        generative_model='glide_100_27'
     ),
     dict(
         real_path='/fssd8/user-data/manosetro/sid_bench/test/ojha2023/laion',
         fake_path='/fssd8/user-data/manosetro/sid_bench/test/ojha2023/glide_50_27',
         source='ojha2023',
         family='diffusion',
-        key='glide_50_27'
+        generative_model='glide_50_27'
     ),
     dict(
         real_path='/fssd8/user-data/manosetro/sid_bench/test/ojha2023/imagenet',
         fake_path='/fssd8/user-data/manosetro/sid_bench/test/ojha2023/guided',
         source='ojha2023',
         family='diffusion',
-        key='guided'
+        generative_model='guided'
     ),
     dict(
         real_path='/fssd8/user-data/manosetro/sid_bench/test/ojha2023/laion',
         fake_path='/fssd8/user-data/manosetro/sid_bench/test/ojha2023/ldm_100',
         source='ojha2023',
         family='diffusion',
-        key='ldm_100'
+        generative_model='ldm_100'
     ),
     dict(
         real_path='/fssd8/user-data/manosetro/sid_bench/test/ojha2023/laion',
         fake_path='/fssd8/user-data/manosetro/sid_bench/test/ojha2023/ldm_200',
         source='ojha2023',
         family='diffusion',
-        key='ldm_200'
+        generative_model='ldm_200'
     ),
     dict(
         real_path='/fssd8/user-data/manosetro/sid_bench/test/ojha2023/laion',
         fake_path='/fssd8/user-data/manosetro/sid_bench/test/ojha2023/ldm_200_cfg',
         source='ojha2023',
         family='diffusion',
-        key='ldm_200_cfg'
+        generative_model='ldm_200_cfg'
     ),
     dict(
         real_path='/fssd8/user-data/manosetro/sid_bench/test/synthbuster/raise',
         fake_path='/fssd8/user-data/manosetro/sid_bench/test/synthbuster/glide/',  
         source='synthbuster',
         family='diffusion',
-        key='glide',
+        generative_model='glide',
         order=1
     ),
     dict(
@@ -159,7 +159,7 @@ DATASET_PATHS = [
         fake_path='/fssd8/user-data/manosetro/sid_bench/test/synthbuster/dalle2/',
         source='synthbuster',
         family='diffusion',
-        key='dalle2',
+        generative_model='dalle2',
         order=2
     ),
     dict(
@@ -167,7 +167,7 @@ DATASET_PATHS = [
         fake_path='/fssd8/user-data/manosetro/sid_bench/test/synthbuster/stable-diffusion-1-3/',  
         source='synthbuster',
         family='diffusion',
-        key='stable-diffusion-1-3',
+        generative_model='stable-diffusion-1-3',
         order=3
     ),
     dict(
@@ -175,7 +175,7 @@ DATASET_PATHS = [
         fake_path='/fssd8/user-data/manosetro/sid_bench/test/synthbuster/stable-diffusion-1-4/',  
         source='synthbuster',
         family='diffusion',
-        key='stable-diffusion-1-4',
+        generative_model='stable-diffusion-1-4',
         order=4
     ),
     dict(
@@ -183,7 +183,7 @@ DATASET_PATHS = [
         fake_path='/fssd8/user-data/manosetro/sid_bench/test/synthbuster/midjourney-v5/',  
         source='synthbuster',
         family='diffusion',
-        key='midjourney-v5',
+        generative_model='midjourney-v5',
         order=5
     ),
     dict(
@@ -191,7 +191,7 @@ DATASET_PATHS = [
         fake_path='/fssd8/user-data/manosetro/sid_bench/test/synthbuster/dalle3/',   
         source='synthbuster',
         family='diffusion',
-        key='dalle3',
+        generative_model='dalle3',
         order=6
     ),
     dict(
@@ -199,7 +199,7 @@ DATASET_PATHS = [
         fake_path='/fssd8/user-data/manosetro/sid_bench/test/synthbuster/stable-diffusion-2/',  
         source='synthbuster',
         family='diffusion',
-        key='stable-diffusion-2',
+        generative_model='stable-diffusion-2',
         order=7
     ),
     dict(
@@ -207,7 +207,7 @@ DATASET_PATHS = [
         fake_path='/fssd8/user-data/manosetro/sid_bench/test/synthbuster/stable-diffusion-xl/',   
         source='synthbuster',
         family='diffusion',
-        key='stable-diffusion-xl',
+        generative_model='stable-diffusion-xl',
         order=8
     ),
     dict(
@@ -215,7 +215,7 @@ DATASET_PATHS = [
         fake_path='/fssd8/user-data/manosetro/sid_bench/test/synthbuster/firefly/',  
         source='synthbuster',
         family='diffusion',
-        key='firefly',
+        generative_model='firefly',
         order=9
     ),
 ]
@@ -227,91 +227,91 @@ LGRAD_DATASET_PATHS = [
         fake_path='/fssd8/user-data/manosetro/sid_bench/test/lgrad/wang2020/biggan/',
         source='wang2020',
         family='gan', # Unconditional GAN
-        key='biggan'
+        generative_model='biggan'
     ),
     dict(
         real_path='/fssd8/user-data/manosetro/sid_bench/test/lgrad/wang2020/cyclegan',   
         fake_path='/fssd8/user-data/manosetro/sid_bench/test/lgrad/wang2020/cyclegan',
         source='wang2020',
         family='gan',
-        key='cyclegan' # Conditional GAN
+        generative_model='cyclegan' # Conditional GAN
     ),
     dict(
         real_path='/fssd8/user-data/manosetro/sid_bench/test/lgrad/wang2020/gaugan',    # It is COCO 
         fake_path='/fssd8/user-data/manosetro/sid_bench/test/lgrad/wang2020/gaugan',
         source='wang2020',
         family='gan', # Conditional GAN
-        key='gaugan'
+        generative_model='gaugan'
     ),
     dict(
         real_path='/fssd8/user-data/manosetro/sid_bench/test/lgrad/wang2020/progan',     
         fake_path='/fssd8/user-data/manosetro/sid_bench/test/lgrad/wang2020/progan',
         source='wang2020',
         family='gan',
-        key='progan' # Unconditional GAN
+        generative_model='progan' # Unconditional GAN
     ),
     dict(
         real_path='/fssd8/user-data/manosetro/sid_bench/test/lgrad/wang2020/stargan',  
         fake_path='/fssd8/user-data/manosetro/sid_bench/test/lgrad/wang2020/stargan',
         source='wang2020',
         family='gan', # Conditional GAN
-        key='stargan'
+        generative_model='stargan'
     ),
     dict(
         real_path='/fssd8/user-data/manosetro/sid_bench/test/lgrad/wang2020/stylegan',    
         fake_path='/fssd8/user-data/manosetro/sid_bench/test/lgrad/wang2020/stylegan',
         source='wang2020',
         family='gan', # Unconditional GAN
-        key='stylegan' 
+        generative_model='stylegan' 
     ),
     dict(
         real_path='/fssd8/user-data/manosetro/sid_bench/test/lgrad/wang2020/stylegan2',    
         fake_path='/fssd8/user-data/manosetro/sid_bench/test/lgrad/wang2020/stylegan2',
         source='wang2020',
         family='gan',
-        key='stylegan2'
+        generative_model='stylegan2'
     ),
     dict(
         real_path='/fssd8/user-data/manosetro/sid_bench/test/lgrad/wang2020/deepfake',   
         fake_path='/fssd8/user-data/manosetro/sid_bench/test/lgrad/wang2020/deepfake',
         source='wang2020', 
         family='deepfake', # FaceForensics++
-        key='deepfake'
+        generative_model='deepfake'
     ),
     dict(
         real_path='/fssd8/user-data/manosetro/sid_bench/test/lgrad/wang2020/crn',   # Images from some video games
         fake_path='/fssd8/user-data/manosetro/sid_bench/test/lgrad/wang2020/crn',
         source='wang2020',
         family='perceptual_loss',
-        key='crn'
+        generative_model='crn'
     ),
     dict(
         real_path='/fssd8/user-data/manosetro/sid_bench/test/lgrad/wang2020/imle',   # Images from some video games
         fake_path='/fssd8/user-data/manosetro/sid_bench/test/lgrad/wang2020/imle',
         source='wang2020',
         family='perceptual_loss',
-        key='imle'
+        generative_model='imle'
     ),
     dict(
         real_path='/fssd8/user-data/manosetro/sid_bench/test/lgrad/wang2020/san',   
         fake_path='/fssd8/user-data/manosetro/sid_bench/test/lgrad/wang2020/san',
         source='wang2020',
         family='low_level_vision',
-        key='san'
+        generative_model='san'
     ),
     dict(
         real_path='/fssd8/user-data/manosetro/sid_bench/test/lgrad/wang2020/whichfaceisreal',
         fake_path='/fssd8/user-data/manosetro/sid_bench/test/lgrad/wang2020/whichfaceisreal',
         source='wang2020',
         family='gan', # StyleGAN 
-        key='whichfaceisreal'
+        generative_model='whichfaceisreal'
     ),
     dict(
         real_path='/fssd8/user-data/manosetro/sid_bench/test/lgrad/synthbuster/raise',
         fake_path='/fssd8/user-data/manosetro/sid_bench/test/lgrad/synthbuster/glide/',  
         source='synthbuster',
         family='diffusion',
-        key='glide',
+        generative_model='glide',
         order=1
     ),
     dict(
@@ -319,7 +319,7 @@ LGRAD_DATASET_PATHS = [
         fake_path='/fssd8/user-data/manosetro/sid_bench/test/lgrad/synthbuster/dalle2/',
         source='synthbuster',
         family='diffusion',
-        key='dalle2',
+        generative_model='dalle2',
         order=2
     ),
     dict(
@@ -327,7 +327,7 @@ LGRAD_DATASET_PATHS = [
         fake_path='/fssd8/user-data/manosetro/sid_bench/test/lgrad/synthbuster/stable-diffusion-1-3/',  
         source='synthbuster',
         family='diffusion',
-        key='stable-diffusion-1-3',
+        generative_model='stable-diffusion-1-3',
         order=3
     ),
     dict(
@@ -335,7 +335,7 @@ LGRAD_DATASET_PATHS = [
         fake_path='/fssd8/user-data/manosetro/sid_bench/test/lgrad/synthbuster/stable-diffusion-1-4/',  
         source='synthbuster',
         family='diffusion',
-        key='stable-diffusion-1-4',
+        generative_model='stable-diffusion-1-4',
         order=4
     ),
     dict(
@@ -343,7 +343,7 @@ LGRAD_DATASET_PATHS = [
         fake_path='/fssd8/user-data/manosetro/sid_bench/test/lgrad/synthbuster/midjourney-v5/',  
         source='synthbuster',
         family='diffusion',
-        key='midjourney-v5',
+        generative_model='midjourney-v5',
         order=5
     ),
     dict(
@@ -351,7 +351,7 @@ LGRAD_DATASET_PATHS = [
         fake_path='/fssd8/user-data/manosetro/sid_bench/test/lgrad/synthbuster/dalle3/',   
         source='synthbuster',
         family='diffusion',
-        key='dalle3',
+        generative_model='dalle3',
         order=6
     ),
     dict(
@@ -359,7 +359,7 @@ LGRAD_DATASET_PATHS = [
         fake_path='/fssd8/user-data/manosetro/sid_bench/test/lgrad/synthbuster/stable-diffusion-2/',  
         source='synthbuster',
         family='diffusion',
-        key='stable-diffusion-2',
+        generative_model='stable-diffusion-2',
         order=7
     ),
     dict(
@@ -367,7 +367,7 @@ LGRAD_DATASET_PATHS = [
         fake_path='/fssd8/user-data/manosetro/sid_bench/test/lgrad/synthbuster/stable-diffusion-xl/',   
         source='synthbuster',
         family='diffusion',
-        key='stable-diffusion-xl',
+        generative_model='stable-diffusion-xl',
         order=8
     ),
     dict(
@@ -375,7 +375,7 @@ LGRAD_DATASET_PATHS = [
         fake_path='/fssd8/user-data/manosetro/sid_bench/test/lgrad/synthbuster/firefly/',  
         source='synthbuster',
         family='diffusion',
-        key='firefly',
+        generative_model='firefly',
         order=9
     ),
 ]

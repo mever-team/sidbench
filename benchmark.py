@@ -1,25 +1,18 @@
 import argparse
 
 from models import get_model, MODELS
-
 from datasets import DATASET_PATHS
 
 import torch
-import numpy as np
-import random
+from evaluate import run_for_model
 
-from evaluate import _run_for_model
+from options import TestOptions
+from util import set_random_seed
 
 
 device = "cuda:0" if torch.cuda.is_available() else "cpu"
 
 SEED = 0
-def set_seed():
-    torch.manual_seed(SEED)
-    torch.cuda.manual_seed(SEED)
-    np.random.seed(SEED)
-    random.seed(SEED)
-
 
 JPEG_QUALITY = [90, 50, 30]
 GAUSSIAN_SIGMA = [2, 4]
@@ -28,49 +21,36 @@ GAUSSIAN_SIGMA = [2, 4]
 if __name__ == '__main__':
 
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-
-    parser.add_argument('--max_sample', type=int, default=5, help='only check this number of images for both fake/real')
-    parser.add_argument('--result_folder', type=str, default='result', help='')
-    parser.add_argument('--batch_size', type=int, default=32)
+    parser = TestOptions().initialize(parser)
 
     opt = parser.parse_args()
 
     for model_params in MODELS:
-        set_seed()
-        print('=' * 20)
-        print('MODEL: ', model_params['name'])
-        model = get_model(classifier=model_params['classifier'], 
-                          backbone=model_params['backbone'], 
-                          ckpt=model_params['ckpt'])
+        set_random_seed()
+        print('Model: ', model_params['model_name'])
+        del model_params["trained_on"]
+
+        model = get_model(**model_params)
         model = model.to(device)
 
         for jpeg_quality in JPEG_QUALITY:
             print('\tjpeg_quality: ', jpeg_quality)
-            _run_for_model(dataset_paths=DATASET_PATHS,
-                           result_folder=opt.result_folder,
-                           model=model, 
-                           model_name=model_params['name'],
-                           classifier=model_params['classifier'],
-                           backbone=model_params['backbone'], 
-                           max_sample=opt.max_sample, 
-                           batch_size=opt.batch_size, 
-                           jpeg_quality=jpeg_quality)
+            opt.gaussianSigma = None
+            opt.jpegQuality = jpeg_quality
+            run_for_model(dataset_paths=DATASET_PATHS, model=model, opt=opt)
         
         for gaussian_sigma in GAUSSIAN_SIGMA:
             print('\tgaussian_sigma: ', gaussian_sigma)
-            _run_for_model(dataset_paths=DATASET_PATHS,
-                           result_folder=opt.result_folder,
-                           model=model, 
-                           model_name=model_params['name'],
-                           classifier=model_params['classifier'],
-                           backbone=model_params['backbone'], 
-                           max_sample=opt.max_sample, 
-                           batch_size=opt.batch_size, 
-                           gaussian_sigma=gaussian_sigma)
+            opt.gaussianSigma = gaussian_sigma
+            opt.jpegQuality = None
+            run_for_model(dataset_paths=DATASET_PATHS, model=model, opt=opt)
         
         print('\tjpeg_quality: ', 50, 'gaussian_sigma: ', 2)
-        _run_for_model(dataset_paths=DATASET_PATHS, result_folder=opt.result_folder,
-                       model=model, model_name=model_params['name'], classifier=model_params['classifier'],
-                       backbone=model_params['backbone'], max_sample=opt.max_sample, batch_size=opt.batch_size, 
-                       jpeg_quality=50, gaussian_sigma=2)
+        opt.gaussianSigma = 2
+        opt.jpegQuality = 50
+        run_for_model(dataset_paths=DATASET_PATHS, model=model, opt=opt)
         
+        print('\tjpeg_quality: ', None, 'gaussian_sigma: ', None)
+        opt.gaussianSigma = None
+        opt.jpegQuality = None
+        run_for_model(dataset_paths=DATASET_PATHS, model=model, opt=opt)
