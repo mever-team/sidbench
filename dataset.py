@@ -19,6 +19,8 @@ from torch.utils.data import Dataset
 import random
 from random import choice
 
+from models import VALID_MODELS
+
 ImageFile.LOAD_TRUNCATED_IMAGES = True
 
 
@@ -53,15 +55,14 @@ def gaussian_blur(img, sigma):
     return Image.fromarray(img)
 
 
-rz_dict = {
-    'bilinear': Image.BILINEAR,
-    'bicubic': Image.BICUBIC,
-    'lanczos': Image.LANCZOS,
-    'nearest': Image.NEAREST
-}
-
-
 def custom_resize(img, opt):
+    rz_dict = {
+        'bilinear': Image.BILINEAR,
+        'bicubic': Image.BICUBIC,
+        'lanczos': Image.LANCZOS,
+        'nearest': Image.NEAREST
+    }
+
     interp = opt.rz_interp[0] if len(opt.rz_interp) == 1 else choice(opt.rz_interp)
     return F.resize(img, opt.loadSize, interpolation=rz_dict[interp])
 
@@ -73,17 +74,17 @@ def normalize(img):
     return img * 255. 
 
 
-def psm_processing(img, cropSize, resizeSize=None):
+def psm_processing(img, opt):
     height, width = img.height, img.width
 
     input_img = copy.deepcopy(img)
     input_img = transforms.ToTensor()(input_img)
     input_img = transforms.Normalize(MEAN['imagenet'], STD['imagenet'])(input_img)
 
-    if resizeSize is not None:
-        img = transforms.Resize(resizeSize)(img)
+    if opt.resizeSize is not None:
+        img = transforms.Resize(opt.resizeSize)(img)
 
-    img = transforms.CenterCrop(cropSize)(img)
+    img = transforms.CenterCrop(opt.cropSize)(img)
     cropped_img = transforms.ToTensor()(img)
     cropped_img = transforms.Normalize(MEAN['imagenet'], STD['imagenet'])(cropped_img)
 
@@ -92,21 +93,21 @@ def psm_processing(img, cropSize, resizeSize=None):
     return input_img, cropped_img, scale
 
 
-def lgrad_processing(img, gen_model, device, cropSize):
-    transforms = transforms.Compose([
-        transforms.CenterCrop(cropSize),
+def lgrad_processing(img, opt):
+    gen_transforms = transforms.Compose([
+        transforms.CenterCrop(opt.cropSize),
         transforms.ToTensor(),
         transforms.Normalize(mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5])
     ])
 
     img_list = []
-    img_list.append(torch.unsqueeze(transforms(img), 0))
+    img_list.append(torch.unsqueeze(gen_transforms(img), 0))
     img = torch.cat(img_list, 0)
     img_cuda = img.to(torch.float32)
-    img_cuda= img_cuda.to(device)
+    img_cuda= img_cuda.to(opt.device)
     img_cuda.requires_grad = True
-    pre = gen_model(img_cuda)
-    gen_model.zero_grad()
+    pre = opt.gen_model(img_cuda)
+    opt.gen_model.zero_grad()
     grads = torch.autograd.grad(pre.sum(), img_cuda, create_graph=True, retain_graph=True, allow_unused=False)[0]
     
     for _, grad in enumerate(grads):
@@ -117,19 +118,24 @@ def lgrad_processing(img, gen_model, device, cropSize):
         img = Image.open(BytesIO(buffer)).convert('RGB')
 
     return transforms.Compose([
-            transforms.CenterCrop(cropSize),
+            transforms.CenterCrop(opt.cropSize),
             transforms.ToTensor(),
             transforms.Normalize(mean=MEAN['imagenet'], std=STD['imagenet'])
         ])(img)
 
 
-def cnnspot_processing(img, cropSize, resizeSize=None):
+def resnet_processing(img, opt):
     transformations = []
 
-    if resizeSize is not None:
-        transformations.append(transforms.Resize(size=(resizeSize, resizeSize)))
-
-    transformations.append(transforms.CenterCrop(cropSize))
+    if opt.resizeSize is not None:
+        transformations.append(transforms.Resize(size=(opt.resizeSize, opt.resizeSize)))
+    
+    if opt.isTrain:
+        crop_func = transforms.RandomCrop(opt.cropSize)
+    else:
+        crop_func = transforms.CenterCrop(opt.cropSize)
+    
+    transformations.append(crop_func)
     transformations.append(transforms.ToTensor())
     transformations.append(transforms.Normalize(mean=MEAN['imagenet'], std=STD['imagenet']))
 
@@ -138,13 +144,18 @@ def cnnspot_processing(img, cropSize, resizeSize=None):
     return transform(img)
 
 
-def unifd_processing(img, cropSize, resizeSize=None):
+def clip_processing(img, opt):
     transformations = []
 
-    if resizeSize is not None:
-        transformations.append(transforms.Resize(size=(resizeSize, resizeSize)))
+    if opt.resizeSize is not None:
+        transformations.append(transforms.Resize(size=(opt.resizeSize, opt.resizeSize)))
 
-    transformations.append(transforms.CenterCrop(cropSize))
+    if opt.isTrain:
+        crop_func = transforms.RandomCrop(opt.cropSize)
+    else:
+        crop_func = transforms.CenterCrop(opt.cropSize)
+
+    transformations.append(crop_func)
     transformations.append(transforms.ToTensor())
     transformations.append(transforms.Normalize(mean=MEAN['clip'], std=STD['clip']))
 
@@ -168,24 +179,24 @@ def dct2_wrapper(image, mean, var, log=True, epsilon=1e-12):
     return (image - mean) / np.sqrt(var)
 
 
-def fredect_processing(img, dct_mean, dct_var, cropSize, resizeSize=None):
+def fredect_processing(img, opt):
     input_img = copy.deepcopy(img)
     input_img = transforms.ToTensor()(input_img)
     input_img = transforms.Normalize(mean=MEAN['imagenet'], std=STD['imagenet'])(input_img)
 
-    if resizeSize is not None:
-        img = transforms.Resize(resizeSize)(img)
+    if opt.resizeSize is not None:
+        img = transforms.Resize(opt.resizeSize)(img)
 
-    img = transforms.CenterCrop(cropSize)(img)
+    img = transforms.CenterCrop(opt.cropSize)(img)
     
-    cropped_img = torch.from_numpy(dct2_wrapper(img, dct_mean, dct_var)).permute(2,0,1).to(dtype=torch.float)
+    cropped_img = torch.from_numpy(dct2_wrapper(img, opt.dct_mean, opt.dct_var)).permute(2,0,1).to(dtype=torch.float)
     
     return cropped_img
 
 
-def processing_RPTC(img, cropSize, patch_num):
-    num_block = int(pow(2, patch_num))
-    patchsize = int(cropSize / num_block)
+def rptc_processing(img, opt):
+    num_block = int(pow(2, opt.patch_num))
+    patchsize = int(opt.cropSize / num_block)
     randomcrop = transforms.RandomCrop(patchsize)
     
     minsize = min(img.size)
@@ -195,7 +206,7 @@ def processing_RPTC(img, cropSize, patch_num):
     img = transforms.ToTensor()(img)
 
     imgori = img.clone().unsqueeze(0)
-    img_template = torch.zeros(3, cropSize, cropSize)
+    img_template = torch.zeros(3, opt.cropSize, opt.cropSize)
     img_crops = []
     for i in range(num_block * num_block * 3):
         cropped_img = randomcrop(img)
@@ -235,6 +246,117 @@ def ED(img):
     return s1 + s2 + s3 + s4
 
 
+def reshape_image(imgs: torch.Tensor, image_size: int) -> torch.Tensor:
+    if len(imgs.shape) == 3:
+        imgs = imgs.unsqueeze(0)
+
+    if imgs.shape[2] != imgs.shape[3]:
+        crop_func = transforms.CenterCrop(image_size)
+        imgs = crop_func(imgs)
+    
+    if imgs.shape[2] != image_size:
+        imgs = F.interpolate(imgs, size=(image_size, image_size), mode="bicubic")
+    return imgs
+
+
+def center_crop_arr(pil_image, image_size):
+    while min(*pil_image.size) >= 2 * image_size:
+        pil_image = pil_image.resize(tuple(x // 2 for x in pil_image.size), resample=Image.BOX)
+
+    scale = image_size / min(*pil_image.size)
+    pil_image = pil_image.resize(tuple(round(x * scale) for x in pil_image.size), resample=Image.BICUBIC)
+
+    arr = np.array(pil_image)
+    crop_y = (arr.shape[0] - image_size) // 2
+    crop_x = (arr.shape[1] - image_size) // 2
+    return arr[crop_y : crop_y + image_size, crop_x : crop_x + image_size]
+
+
+def dire_processing(img, opt):
+    img = center_crop_arr(img, opt.cropSize)
+    img = img.astype(np.float32) / 127.5 - 1
+    img = torch.from_numpy(np.transpose(img, [2, 0, 1]))
+
+    img_list = []
+    img_list.append(torch.unsqueeze(img,0))
+    img=torch.cat(img_list,0)
+
+    reverse_fn = opt.diffusion.ddim_reverse_sample_loop
+    img = reshape_image(img, opt.dire_args.image_size)
+    
+    img = img.to(opt.device)
+    model_kwargs = {}
+
+    latent = reverse_fn(
+        opt.diffusion_model,
+        (1, 3, opt.dire_args.image_size, opt.dire_args.image_size),
+        noise=img,
+        clip_denoised=opt.dire_args.clip_denoised,
+        model_kwargs=model_kwargs,
+        real_step=opt.dire_args.real_step,
+    )
+
+    sample_fn = opt.diffusion.p_sample_loop if not opt.dire_args.use_ddim else opt.diffusion.ddim_sample_loop
+    recons = sample_fn(
+        opt.diffusion_model,
+        (1, 3, opt.dire_args.image_size, opt.dire_args.image_size),
+        noise=latent,
+        clip_denoised=opt.dire_args.clip_denoised,
+        model_kwargs=model_kwargs,
+        real_step=opt.dire_args.real_step,
+    )
+
+    dire = torch.abs(img - recons)
+    dire = (dire * 255.0 / 2.0).clamp(0, 255).to(torch.uint8)
+    dire = dire.permute(0, 2, 3, 1)
+    dire = dire.contiguous()
+    for i in range(len(dire)):
+        retval, buffer = cv2.imencode(".png", cv2.cvtColor(dire[i].cpu().numpy().astype(np.uint8), cv2.COLOR_RGB2BGR))
+        if retval:
+            img_dire = Image.open(BytesIO(buffer)).convert('RGB')
+
+    return resnet_processing(img_dire, opt)
+
+
+def processing(img, opt):
+    assert opt.model_name in VALID_MODELS
+
+    if opt.model_name == 'PSM':
+        return psm_processing(img, opt)
+    
+    if opt.model_name == 'LGrad':
+        return lgrad_processing(img, opt)
+    
+    if opt.model_name == 'CNNDetect':
+        return resnet_processing(img, opt)
+    
+    if opt.model_name == 'UnivFD':
+        return clip_processing(img, opt)
+    
+    if opt.model_name == 'RPTC':
+        return rptc_processing(img, opt)
+    
+    if opt.model_name == 'DIMD':
+        return resnet_processing(img, opt)
+    
+    if opt.model_name == 'NPR':
+        return resnet_processing(img, opt)
+    
+    if opt.model_name == 'Rine':
+        return clip_processing(img, opt)
+
+    if opt.model_name == 'FreDetect':
+        return fredect_processing(img, opt)
+    
+    if opt.model_name == 'GramNet':
+        return resnet_processing(img, opt)
+    
+    if opt.model_name == 'Dire':
+        return dire_processing(img, opt)
+    
+    raise ValueError(f"Model {opt.model_name} not found")
+
+
 class SyntheticImageDetectionDataset(Dataset):
     def __init__(self, data_paths, max_sample=None, jpeg_quality=None, gaussian_sigma=None):    
 
@@ -250,11 +372,6 @@ class SyntheticImageDetectionDataset(Dataset):
             self.labels_dict[i] = 0
         for i in self.fake_list:
             self.labels_dict[i] = 1
-
-        # if is_train:
-        #     crop_func = transforms.RandomCrop(224)
-        # else:
-        #     crop_func = transforms.CenterCrop(224)
 
 
     def merge(self, other_dataset):

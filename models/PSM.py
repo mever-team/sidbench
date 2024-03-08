@@ -146,12 +146,12 @@ class PSM(nn.Module):
     def load_weights(self, ckpt):
         state_dict = torch.load(ckpt, map_location='cpu')
         try:
-            self.model.load_state_dict(state_dict['model'])
+            self.load_state_dict(state_dict['model'], strict=True)
         except:
-            self.model.load_state_dict(state_dict)
+            self.load_state_dict(state_dict)
 
-    def predict(self, img):
+    def predict(self, input_img, cropped_img, scale):
         with torch.no_grad():
-            logits = self.forward(img)
+            logits = self.forward(input_img, cropped_img, scale)
             return logits.sigmoid().flatten().tolist()
         

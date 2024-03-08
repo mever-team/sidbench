@@ -4,9 +4,9 @@ import torch
 from networks.resnet import resnet50
 
 
-class FreDetect(nn.Module):
+class Dire(nn.Module):
     def __init__(self):
-        super(FreDetect, self).__init__()
+        super(Dire, self).__init__()
         self.model = resnet50(num_classes=1)
 
     def forward(self, x):
@@ -15,7 +15,7 @@ class FreDetect(nn.Module):
     def load_weights(self, ckpt):
         state_dict = torch.load(ckpt, map_location='cpu')
         try:
-            self.model.load_state_dict(state_dict['netC'])
+            self.model.load_state_dict(state_dict['model'])
         except:
             self.model.load_state_dict(state_dict)
 

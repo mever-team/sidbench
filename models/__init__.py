@@ -6,9 +6,11 @@ from models.UnivFD import UnivFD
 from models.GramNet import GramNet
 from models.Rine import RineModel
 from models.LGrad import LGrad
+from models.DIMD import DIMD
+from models.NPR import NPR
 
 
-VALID_MODELS = ['CNNDetect', 'FreDetect', 'Fusing', 'GramNet', 'LGrad', 'UnivFD', 'RPTC', 'Rine']
+VALID_MODELS = ['CNNDetect', 'FreDetect', 'Fusing', 'GramNet', 'LGrad', 'UnivFD', 'RPTC', 'Rine', 'DIMD', 'NPR']
 
 
 def get_model(model_name, ckpt, ncls=None):
@@ -29,7 +31,12 @@ def get_model(model_name, ckpt, ncls=None):
         model = UnivFD()
     elif model_name == 'RPTC':
         model = RPTCNet()
+    elif model_name == 'DIMD':
+        model = DIMD()
+    elif model_name == 'NPR':
+        model = NPR()
     elif model_name == 'Rine':
+        assert ncls is not None
         if ncls == '1class':
             nproj = 4
             proj_dim = 1024
@@ -47,3 +54,4 @@ def get_model(model_name, ckpt, ncls=None):
     model.load_weights(ckpt=ckpt)
     model.eval()
 
+    return model

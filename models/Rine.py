@@ -19,23 +19,25 @@ class Hook:
 
 class RineModel(nn.Module):
     def __init__(self, backbone, nproj, proj_dim):
-        super().__init__()
+        super(RineModel, self).__init__()
 
         # Load and freeze CLIP
-        self.clip, self.preprocess = clip.load(backbone[0])
+        self.clip, _ = clip.load(backbone[0], device="cpu")
         for _, param in self.clip.named_parameters():
             param.requires_grad = False
 
         # Register hooks to get intermediate layer outputs
         self.hooks = [
-            Hook(name, module)
-            for name, module in self.clip.visual.named_modules()
-            if "ln_2" in name
+            Hook(name, module) for name, module in self.clip.visual.named_modules() if "ln_2" in name
         ]
 
         # Initialize the trainable part of the model
         self.alpha = nn.Parameter(torch.randn([1, len(self.hooks), proj_dim]))
-        proj1_layers = [nn.Dropout()]
+
+        proj1_layers = [
+            nn.Dropout()
+        ]
+
         for i in range(nproj):
             proj1_layers.extend(
                 [
@@ -45,6 +47,7 @@ class RineModel(nn.Module):
                 ]
             )
         self.proj1 = nn.Sequential(*proj1_layers)
+
         proj2_layers = [nn.Dropout()]
         for _ in range(nproj):
             proj2_layers.extend(
@@ -55,6 +58,7 @@ class RineModel(nn.Module):
                 ]
             )
         self.proj2 = nn.Sequential(*proj2_layers)
+
         self.head = nn.Sequential(
             *[
                 nn.Linear(proj_dim, proj_dim),
@@ -71,6 +75,7 @@ class RineModel(nn.Module):
         with torch.no_grad():
             self.clip.encode_image(x)
             g = torch.stack([h.output for h in self.hooks], dim=2)[0, :, :, :]
+
         g = self.proj1(g.float())
 
         z = torch.softmax(self.alpha, dim=1) * g
@@ -87,6 +92,6 @@ class RineModel(nn.Module):
             return logits.sigmoid().flatten().tolist()
         
     def load_weights(self, ckpt):
-        state_dict = torch.load(ckpt)
+        state_dict = torch.load(ckpt, map_location='cpu')
         for name in state_dict:
-            exec(f'model.{name.replace(".", "[", 1).replace(".", "].", 1)} = torch.nn.Parameter(state_dict["{name}"])')
+            exec(f'self.{name.replace(".", "[", 1).replace(".", "].", 1)} = torch.nn.Parameter(state_dict["{name}"])')

@@ -15,7 +15,7 @@ class GramNet(nn.Module):
     def load_weights(self, ckpt):
         state_dict = torch.load(ckpt, map_location='cpu')
         try:
-            self.model.load_state_dict(state_dict['model'])
+            self.model.load_state_dict(state_dict['netC'])
         except:
             self.model.load_state_dict(state_dict)
 

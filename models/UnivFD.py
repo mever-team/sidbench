@@ -6,9 +6,9 @@ import torch
 
 
 class UnivFD(nn.Module):
-    def __init__(self, name, num_classes=1):
+    def __init__(self, num_classes=1):
         super(UnivFD, self).__init__()
-        self.model, _ = clip.load(name, device="cpu")
+        self.model, _ = clip.load("ViT-L/14", device="cpu")
         self.fc = nn.Linear(768, num_classes)
 
     def forward(self, x):

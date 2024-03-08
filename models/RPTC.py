@@ -1,7 +1,7 @@
 import torch
 import torch.nn as nn
 import numpy as np
-from srm_filter_kernel import all_normalized_hpf_list
+from models.srm_filter_kernel import all_normalized_hpf_list
 
 
 class TLU(nn.Module):
@@ -113,6 +113,7 @@ class Net(nn.Module):
     def forward(self, input):
         img_poor = input[:,0,:,:,:]
         img_rich = input[:,1,:,:,:]
+        
         a,b,c,d = img_poor.shape
 
         img_poor = img_poor.reshape(-1,1,c,d)
@@ -146,10 +147,13 @@ class Net(nn.Module):
         return out
 
     def load_weights(self, ckpt):
-        self.model.apply(initWeights)
+        self.apply(initWeights)
     
         state_dict = torch.load(ckpt, map_location='cpu')
-        self.model.load_state_dict(state_dict['model'])
+        try:
+            self.load_state_dict(state_dict['netC'], strict=True)
+        except:
+            self.load_state_dict({k.replace('module.', ''): v for k, v in state_dict['netC'].items()})
 
 
     def predict(self, img):
@@ -165,8 +169,3 @@ def initWeights(module):
     if type(module) == nn.Linear:
         nn.init.normal_(module.weight.data, mean=0, std=0.01)
         nn.init.constant_(module.bias.data, val=0)
-
-
-if __name__=='__main__':
-    x = torch.rand(10,1,256,256)
-    out = Net(x)
