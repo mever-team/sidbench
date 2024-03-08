@@ -6,16 +6,16 @@ This project is a framework for benchmarking several state-of-the-art synthetic 
 
 ## Integrated Models
 
-|method|paper|code|
+|Model|Paper|Code|
 |:--------:|:------:|:------:|
-|CNNDetect|CNN-generated images are surprisingly easy to spot...for now| [:link:](https://github.com/peterwang512/CNNDetection) |
-|[FreDetect](https://github.com/RUB-SysSec/GANDCTAnalysis)|Leveraging Frequency Analysis for Deep Fake Image Recognition| |
-|[Fusing](https://github.com/littlejuyan/FusingGlobalandLocal)|Fusing global and local features for generalized AI-synthesized image detection| |
-|[GramNet](https://github.com/liuzhengzhe/Global_Texture_Enhancement_for_Fake_Face_Detection_in_the-Wild)|Global Texture Enhancement for Fake Face Detection In the Wild| |
-|[LGrad](https://github.com/chuangchuangtan/LGrad)|Learning on Gradients: Generalized Artifacts Representation for GAN-Generated Images Detection| |
-|[DIRE](https://github.com/ZhendongWang6/DIRE)|DIRE for Diffusion-Generated Image Detection| |
-|[UnivFD](https://github.com/Yuheng-Li/UniversalFakeDetect)|Towards Universal Fake Image Detectors that Generalize Across Generative Models| |
-|RPTC |Rich and Poor Texture Contrast: A Simple yet Effective Approach for AI-generated Image Detection| |
+|CNNDetect|CNN-generated images are surprisingly easy to spot...for now | [:link:](https://github.com/peterwang512/CNNDetection)|
+|FreDetect|Leveraging Frequency Analysis for Deep Fake Image Recognition | [:link:](https://github.com/RUB-SysSec/GANDCTAnalysis)|
+|Fusing|Fusing global and local features for generalized AI-synthesized image detection| [:link:](https://github.com/littlejuyan/FusingGlobalandLocal)|
+|GramNet|Global Texture Enhancement for Fake Face Detection In the Wild | [:link:](https://github.com/liuzhengzhe/Global_Texture_Enhancement_for_Fake_Face_Detection_in_the-Wild)|
+|LGrad|Learning on Gradients: Generalized Artifacts Representation for GAN-Generated Images Detection | [:link:](https://github.com/chuangchuangtan/LGrad)|
+|DIRE|DIRE for Diffusion-Generated Image Detection | [:link:](https://github.com/ZhendongWang6/DIRE)|
+|UnivFD|Towards Universal Fake Image Detectors that Generalize Across Generative Models | [:link:](https://github.com/Yuheng-Li/UniversalFakeDetect)|
+|RPTC |Rich and Poor Texture Contrast: A Simple yet Effective Approach for AI-generated Image Detection | [:link:]|
 
 
 ## Usage
