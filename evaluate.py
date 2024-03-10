@@ -95,7 +95,6 @@ def validate(model, loader, device, find_threshold=False):
 def run_for_model(datasets, model, opt):
     
     device = setup_device(opt.gpus)
-    model = model.to(device)
 
     all_metrics = []
     for dataset_params in datasets:
@@ -131,7 +130,7 @@ if __name__ == '__main__':
 
     print('model: ', opt.modelName)
 
-    model = get_model(model_name=opt.modelName, ckpt=opt.ckpt)
+    model = get_model(opt)
 
     if (opt.realPath != None) and (opt.fakePath != None):
         datasets = [ 

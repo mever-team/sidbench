@@ -232,6 +232,9 @@ def center_crop_arr(pil_image, image_size):
 
 
 def dire_processing(img, opt):
+
+    device = setup_device(opt.gpus)
+
     img = center_crop_arr(img, opt.cropSize)
     img = img.astype(np.float32) / 127.5 - 1
     img = torch.from_numpy(np.transpose(img, [2, 0, 1]))
@@ -241,28 +244,28 @@ def dire_processing(img, opt):
     img=torch.cat(img_list,0)
 
     reverse_fn = opt.diffusion.ddim_reverse_sample_loop
-    img = reshape_image(img, opt.dire_args.image_size)
+    img = reshape_image(img, opt.direArgs['image_size'])
     
-    img = img.to(opt.device)
+    img = img.to(device)
     model_kwargs = {}
 
     latent = reverse_fn(
-        opt.diffusion_model,
-        (1, 3, opt.dire_args.image_size, opt.dire_args.image_size),
+        opt.diffusionModel,
+        (1, 3, opt.direArgs['image_size'], opt.direArgs['image_size']),
         noise=img,
-        clip_denoised=opt.dire_args.clip_denoised,
+        clip_denoised=opt.direArgs['clip_denoised'],
         model_kwargs=model_kwargs,
-        real_step=opt.dire_args.real_step,
+        real_step=opt.direArgs['real_step'],
     )
 
-    sample_fn = opt.diffusion.p_sample_loop if not opt.dire_args.use_ddim else opt.diffusion.ddim_sample_loop
+    sample_fn = opt.diffusion.p_sample_loop if not opt.direArgs['use_ddim'] else opt.diffusion.ddim_sample_loop
     recons = sample_fn(
-        opt.diffusion_model,
-        (1, 3, opt.dire_args.image_size, opt.dire_args.image_size),
+        opt.diffusionModel,
+        (1, 3, opt.direArgs['image_size'], opt.direArgs['image_size']),
         noise=latent,
-        clip_denoised=opt.dire_args.clip_denoised,
+        clip_denoised=opt.direArgs['clip_denoised'],
         model_kwargs=model_kwargs,
-        real_step=opt.dire_args.real_step,
+        # real_step=opt.direArgs['real_step'],
     )
 
     dire = torch.abs(img - recons)

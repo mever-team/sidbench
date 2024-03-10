@@ -19,9 +19,9 @@ import torch.distributed as dist
 
 
 sys.path.append("/data_19/AIGCDetect/AIGCDetect")
-from preprocessing_model.guided_diffusion import dist_util, logger
-from preprocessing_model.guided_diffusion.image_datasets import load_data_for_reverse
-from preprocessing_model.guided_diffusion.script_util import (
+from preprocessing.dire.guided_diffusion import dist_util, logger
+from preprocessing.dire.guided_diffusion.image_datasets import load_data_for_reverse
+from preprocessing.dire.guided_diffusion.script_util import (
     NUM_CLASSES,
     model_and_diffusion_defaults,
     create_model_and_diffusion,

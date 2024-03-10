@@ -1,16 +1,14 @@
 import argparse
 
-from models import get_model, MODELS
+from models import get_model
+from models.models import MODELS
+
 from dataset.dataset_paths import DATASET_PATHS
 
-import torch
 from evaluate import run_for_model
 
 from options import TestOptions
 from utils.util import set_random_seed
-
-
-device = "cuda:0" if torch.cuda.is_available() else "cpu"
 
 SEED = 0
 
@@ -35,11 +33,12 @@ if __name__ == '__main__':
 
     for model_params in MODELS:
         set_random_seed()
-        print('Model: ', model_params['model_name'])
-        del model_params["trained_on"]
+        print('Model: ', model_params['modelName'])
 
-        model = get_model(**model_params)
-        model = model.to(device)
+        opt.modelName = model_params['modelName']
+        opt.ckpt = model_params['ckpt']
+        
+        model = get_model(opt)
 
         print('\tjpeg_quality: ', None, 'gaussian_sigma: ', None)
         opt.gaussianSigma = None

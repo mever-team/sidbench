@@ -9,7 +9,6 @@ from scipy.ndimage import gaussian_filter
 
 import torch
 from torch.utils.data import Dataset
-from torchvision import transforms
 
 import random
 

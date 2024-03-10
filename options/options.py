@@ -12,8 +12,8 @@ class TestOptions():
     def initialize(self, parser):
 
         parser.add_argument('--dataPath', type=str, default=None, help='dir name of data')
-        parser.add_argument('--modelName', type=str, default='LGrad', help='One of CNNDetect, FreqDetect, Fusing, GramNet, LGrad, UnivFD, RPTC, Rine, DIMD, NPR')    
-        parser.add_argument('--ckpt', type=str, default='./weights/lgrad/LGrad-1class-Trainon-Progan_horse.pth', help='Must match with the selected model')
+        parser.add_argument('--modelName', type=str, default='Dire', help='One of CNNDetect, FreqDetect, Fusing, GramNet, LGrad, UnivFD, RPTC, Rine, DIMD, NPR, Dire')    
+        parser.add_argument('--ckpt', type=str, default='./weights/dire/lsun_adm.pth', help='Must match with the selected model')
 
         parser.add_argument('--predictionsFile', type=str, default='predictions.csv', help='file to save predictions')
 
@@ -38,6 +38,11 @@ class TestOptions():
         # LGrad
         parser.add_argument('--LGradModelPath', type=str,default='./weights/preprocessing/karras2019stylegan-bedrooms-256x256_discriminator.pth', help='the path of LGrad pre-trained model')
         parser.add_argument('--LGradGenerativeModel')
+
+        # Dire
+        parser.add_argument('--diffusion')
+        parser.add_argument('--diffusionModel')
+        parser.add_argument('--direArgs')
 
         self.initialized = True
         
