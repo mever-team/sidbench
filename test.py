@@ -1,62 +1,75 @@
-import copy
-import json
+import argparse
+
+from dataset.dataset import RecursiveImageDataset
+from dataset.process import processing
+
 from models import get_model
-
+from options import TestOptions
 import torch
-from torchvision import transforms
+from tqdm import tqdm
+
+from utils.util import setup_device
+from dataset import patch_collate
+
+from preprocessing.lgrad.models import build_model
+
+if __name__ == '__main__':
+
+    parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+    parser = TestOptions().initialize(parser)
+
+    opt = parser.parse_args()
+
+    device = setup_device(opt.gpus)
+
+    print('model: ', opt.modelName)
+    print('ckpt: ', opt.ckpt)
+    print('dataPath: ', opt.dataPath)
+
+    model = get_model(model_name=opt.modelName, ckpt=opt.ckpt)
+    model = model.to(device)
+
+    collate_fn = patch_collate if opt.modelName == 'Fusing' else None
+
+    if opt.modelName == 'FreqDetect':
+        opt.dctMean = torch.load(opt.dctMean).permute(1,2,0).numpy()
+        opt.dctVar = torch.load(opt.dctVar).permute(1,2,0).numpy()
+
+    if opt.modelName == 'LGrad':
+        opt.numThreads = int(0)
+        gen_model = build_model(gan_type='stylegan', 
+                                module='discriminator', 
+                                resolution=256, 
+                                label_size=0, 
+                                image_channels=3)
+        gen_model.load_state_dict(torch.load(opt.LGradModelPath), strict=True)
+        gen_model = gen_model.to(device)
+        opt.LGradGenerativeModel = gen_model
 
 
-MEAN = { 
-    "imagenet":[0.485, 0.456, 0.406], 
-    "clip":[0.48145466, 0.4578275, 0.40821073] 
-}
+    dataset = RecursiveImageDataset(data_path=opt.dataPath, opt=opt, process_fn=processing)
+    loader = torch.utils.data.DataLoader(dataset, 
+                                         batch_size=opt.batchSize, 
+                                         shuffle=False, 
+                                         num_workers=opt.numThreads,
+                                         collate_fn=collate_fn)
+    
+    all = 0
+    correct = 0
 
-STD = { 
-    "imagenet":[0.229, 0.224, 0.225], 
-    "clip":[0.26862954, 0.26130258, 0.27577711] 
-}
-
-
-def psm_processing(img, cropSize, resizeSize):
-    height, width = img.height, img.width
-
-    input_img = copy.deepcopy(img)
-    input_img = transforms.ToTensor()(input_img)
-    input_img = transforms.Normalize(MEAN['imagenet'], STD['imagenet'])(input_img)
-
-    if resizeSize is not None:
-        img = transforms.Resize(resizeSize)(img)
-
-    img = transforms.CenterCrop(cropSize)(img)
-    cropped_img = transforms.ToTensor()(img)
-    cropped_img = transforms.Normalize(MEAN['imagenet'], STD['imagenet'])(cropped_img)
-
-    scale = torch.tensor([height, width])
-
-    return input_img, cropped_img, scale
-
-
-if __name__ == "__main__":
-
-    with open("models.json", "r") as f:
-        models = json.load(f)
-
-    for model_metadata in models:
-        if model_metadata["model_name"] != "Rine":
-            continue
-
-        print(model_metadata["model_name"])
-        print(model_metadata["ckpt"])
-
-        del model_metadata["trained_on"]
-
-        model = get_model(**model_metadata)
-        model.eval()
-
-        model = model.to("cuda:0")
-        img = torch.rand(1, 3, 224, 224).to("cuda:0")
+    for img, label, img_path in tqdm(loader):
+        # if list move each part to device
+        if isinstance(img, list):
+            img = [i.to(device) for i in img]
+            predictions = model.predict(*img)
+        else:
+            img = img.to(device) 
+            predictions = model.predict(img)
         
-        out = model.predict(img)
 
-        print(out)
-        print("------------------------------------")
+        labels = [1 if p > 0.5 else 0 for p in predictions]
+
+        correct += sum(labels)
+        all += len(labels)
+
+    print('Accuracy: ', correct / all)

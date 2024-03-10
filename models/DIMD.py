@@ -18,6 +18,7 @@ class DIMD(nn.Module):
         try:
             self.model.load_state_dict(state_dict['model'])
         except:
+            print('Loading state dict failed. Trying to load without model prefix.')
             self.model.load_state_dict(state_dict)
 
     def predict(self, img):

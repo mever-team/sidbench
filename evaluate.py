@@ -3,8 +3,8 @@ import os
 import json
 from numpyencoder import NumpyEncoder
 
-from dataset import SyntheticImageDetectionDataset
-from datasets import DATASET_PATHS
+from dataset.dataset import SyntheticImagesDataset
+from dataset.dataset_paths import DATASET_PATHS
 
 import shutil
 
@@ -14,14 +14,12 @@ from tqdm import tqdm
 import numpy as np
 
 from models import get_model
-from eval_utils import calculate_performance_metrics
+from utils.evaluation_utils import calculate_performance_metrics
 
-from options import TestOptions
-from util import set_random_seed
+from options import EvalOptions
+from utils.util import set_random_seed, setup_device
 
-device = "cuda:0" if torch.cuda.is_available() else "cpu"
-
-print("device: ", device)
+from dataset.process import processing
 
 SEED = 0
 
@@ -79,7 +77,7 @@ def write_metrics(output_folder, all_metrics):
         json.dump(curves, f, indent=4, cls=NumpyEncoder)
 
 
-def validate(model, loader, find_threshold=False):
+def validate(model, loader, device, find_threshold=False):
     y_true, y_pred = [], []
     for img, label in tqdm(loader):
         img = img.to(device) 
@@ -94,29 +92,28 @@ def validate(model, loader, find_threshold=False):
     return calculate_performance_metrics(y_true, y_pred, find_threshold)
 
 
-def run_for_model(dataset_paths, model, opt):
+def run_for_model(datasets, model, opt):
     
+    device = setup_device(opt.gpus)
+    model = model.to(device)
+
     all_metrics = []
-    for dataset_path in (dataset_paths):
+    for dataset_params in datasets:
         set_random_seed()
-        dataset = SyntheticImageDetectionDataset(
-            data_paths = [dataset_path['real_path'], dataset_path['fake_path']], 
-            max_sample = opt.maxSample, 
-            jpeg_quality = opt.jpegQuality, 
-            gaussian_sigma = opt.gaussianSigma
-        )
 
-        print('\t\t', dataset_path['source'], dataset_path['generative_model'], len(dataset))
+        data_paths = dataset_params['data_paths']
+        dataset = SyntheticImagesDataset(data_paths=data_paths, opt=opt, process_fn=processing)
 
+        print('\t\t', dataset_params['source'], dataset_params['generative_model'], len(dataset))
         loader = torch.utils.data.DataLoader(dataset, 
                                              batch_size=opt.batchSize, 
                                              shuffle=False, 
                                              num_workers=opt.numThreads)
 
-        metrics = validate(model, loader, find_threshold=True)
-        metrics['source'] = dataset_path['source']
-        metrics['generative_model'] = dataset_path['generative_model']
-        metrics['family'] = dataset_path['family']
+        metrics = validate(model, loader, device, find_threshold=True)
+        metrics['source'] = dataset_params['source'] if 'source' in dataset_params else 'unknown'
+        metrics['generative_model'] = dataset_params['generative_model'] if 'generative_model' in dataset_params else 'unknown'
+        metrics['family'] = dataset_params['family'] if 'family' in dataset_params else 'unknown'
 
         all_metrics.append(metrics)
 
@@ -128,21 +125,39 @@ def run_for_model(dataset_paths, model, opt):
 if __name__ == '__main__':
 
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-    parser = TestOptions().initialize(parser)
+    parser = EvalOptions().initialize(parser)
 
     opt = parser.parse_args()
 
     print('model: ', opt.modelName)
 
     model = get_model(model_name=opt.modelName, ckpt=opt.ckpt)
-    model = model.to(device)
 
-    if (opt.realPath == None) or (opt.fakePath == None):
-        dataset_paths = [dp for dp in DATASET_PATHS if dp['source'] == opt.source] if opt.source != None else DATASET_PATHS
+    if (opt.realPath != None) and (opt.fakePath != None):
+        datasets = [ 
+            dict(data_paths=[opt.realPath, opt.fakePath], 
+                 source=opt.source,
+                 generative_model=opt.generativeModel,
+                 family=opt.family
+            )
+        ]
+    elif opt.dataPath != None:
+        datasets = [ 
+            dict(data_paths=[opt.dataPath], 
+                 source=opt.source,
+                 generative_model=opt.generativeModel,
+                 family=opt.family
+            )
+        ]
     else:
-        dataset_paths = [ dict(real_path=opt.realPath, fake_path=opt.fakePath, source=opt.source, key=opt.key) ]
-
-    run_for_model(dataset_paths=dataset_paths, result_folder=opt.resultFolder,
-                   model=model, model_name=opt.modelName, max_sample=opt.maxSample, batch_size=opt.batchSize, 
-                   jpeg_quality=opt.jpegQuality, gaussian_sigma=opt.gaussianSigma)
+        dataset_paths = [dp for dp in DATASET_PATHS if dp['source'] == opt.source] if opt.source != None else DATASET_PATHS
+        datasets = [
+            dict(data_paths=[dp['real_path'], dp['fake_path']], 
+                 source=dp['source'],
+                 generative_model=dp['generative_model'],
+                 family=dp['family'])
+            for dp in dataset_paths
+        ]
+    
+    run_for_model(datasets=datasets, model=model, opt=opt)
 

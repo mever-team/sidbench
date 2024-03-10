@@ -15,7 +15,7 @@ This project is a framework for benchmarking several state-of-the-art synthetic 
 |LGrad|Learning on Gradients: Generalized Artifacts Representation for GAN-Generated Images Detection | [:link:](https://github.com/chuangchuangtan/LGrad)|
 |DIRE|DIRE for Diffusion-Generated Image Detection | [:link:](https://github.com/ZhendongWang6/DIRE)|
 |UnivFD|Towards Universal Fake Image Detectors that Generalize Across Generative Models | [:link:](https://github.com/Yuheng-Li/UniversalFakeDetect)|
-|RPTC |Rich and Poor Texture Contrast: A Simple yet Effective Approach for AI-generated Image Detection | [:link:]|
+|RPTC |Rich and Poor Texture Contrast: A Simple yet Effective Approach for AI-generated Image Detection | :link: |
 
 
 ## Usage

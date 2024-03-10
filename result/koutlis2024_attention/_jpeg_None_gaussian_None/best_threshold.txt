@@ -1,9 +1,0 @@
-glide: 0.01
-dalle2: 0.03
-stable-diffusion-1-3: 0.01
-stable-diffusion-1-4: 0.02
-midjourney-v5: 0.859
-dalle3: 1.0
-stable-diffusion-2: 0.111
-stable-diffusion-xl: 0.091
-firefly: 0.03

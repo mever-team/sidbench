@@ -1,20 +1,20 @@
 import argparse
 
 from models import get_model, MODELS
-from datasets import DATASET_PATHS
+from dataset.dataset_paths import DATASET_PATHS
 
 import torch
 from evaluate import run_for_model
 
 from options import TestOptions
-from util import set_random_seed
+from utils.util import set_random_seed
 
 
 device = "cuda:0" if torch.cuda.is_available() else "cpu"
 
 SEED = 0
 
-JPEG_QUALITY = [90, 50, 30]
+JPEG_QUALITY = [95, 90, 50, 30]
 GAUSSIAN_SIGMA = [2, 4]
 
 
@@ -25,6 +25,14 @@ if __name__ == '__main__':
 
     opt = parser.parse_args()
 
+    datasets = [
+        dict(data_paths=[dp['real_path'], dp['fake_path']], 
+             source=dp['source'],
+             generative_model=dp['generative_model'],
+             family=dp['family'])
+        for dp in DATASET_PATHS
+    ]
+
     for model_params in MODELS:
         set_random_seed()
         print('Model: ', model_params['model_name'])
@@ -33,24 +41,24 @@ if __name__ == '__main__':
         model = get_model(**model_params)
         model = model.to(device)
 
+        print('\tjpeg_quality: ', None, 'gaussian_sigma: ', None)
+        opt.gaussianSigma = None
+        opt.jpegQuality = None
+        run_for_model(datasets=datasets, model=model, opt=opt)
+
         for jpeg_quality in JPEG_QUALITY:
             print('\tjpeg_quality: ', jpeg_quality)
             opt.gaussianSigma = None
             opt.jpegQuality = jpeg_quality
-            run_for_model(dataset_paths=DATASET_PATHS, model=model, opt=opt)
+            run_for_model(datasets=datasets, model=model, opt=opt)
         
         for gaussian_sigma in GAUSSIAN_SIGMA:
             print('\tgaussian_sigma: ', gaussian_sigma)
             opt.gaussianSigma = gaussian_sigma
             opt.jpegQuality = None
-            run_for_model(dataset_paths=DATASET_PATHS, model=model, opt=opt)
+            run_for_model(datasets=datasets, model=model, opt=opt)
         
         print('\tjpeg_quality: ', 50, 'gaussian_sigma: ', 2)
         opt.gaussianSigma = 2
         opt.jpegQuality = 50
-        run_for_model(dataset_paths=DATASET_PATHS, model=model, opt=opt)
-        
-        print('\tjpeg_quality: ', None, 'gaussian_sigma: ', None)
-        opt.gaussianSigma = None
-        opt.jpegQuality = None
-        run_for_model(dataset_paths=DATASET_PATHS, model=model, opt=opt)
+        run_for_model(datasets=datasets, model=model, opt=opt)

@@ -27,7 +27,7 @@ class HPF(nn.Module):
 
             all_hpf_list_5x5.append(hpf_item)
 
-        hpf_weight = nn.Parameter(torch.Tensor(all_hpf_list_5x5).view(30, 1, 5, 5), requires_grad=False)
+        hpf_weight = nn.Parameter(torch.Tensor(np.array(all_hpf_list_5x5)).view(30, 1, 5, 5), requires_grad=False)
 
         self.hpf = nn.Conv2d(1, 30, kernel_size=5, padding=2, bias=False)
         self.hpf.weight = hpf_weight
@@ -153,7 +153,10 @@ class Net(nn.Module):
         try:
             self.load_state_dict(state_dict['netC'], strict=True)
         except:
-            self.load_state_dict({k.replace('module.', ''): v for k, v in state_dict['netC'].items()})
+            try:
+                self.load_state_dict(state_dict, strict=True)
+            except:
+                self.load_state_dict({k.replace('module.', ''): v for k, v in state_dict['netC'].items()})
 
 
     def predict(self, img):
