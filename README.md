@@ -21,7 +21,7 @@ conda install pytorch torchvision torchaudio pytorch-cuda=12.1 -c pytorch -c nvi
 
 > **Note** :sparkles:: This framework has been **tested** with Python version `3.11.7` and PyTorch `2.1.2`. However, it **should work** with other versions as well. Please ensure that your PyTorch version is **greater than 2.0**. :warning:
 
-Install additional dependencies 
+Install additional dependencies: 
 
 ```bash
 pip install -r requirements.txt
@@ -54,9 +54,89 @@ The following models have been integrated. Note that for some of these models, t
 
 ## Usage
 
-### Run model on a single image
-
 ### Run model on multiple images 
+
+To run the model on a directory containing images, use the following command:
+
+```bash
+
+python test.py --dataPath <root_path_to_images>
+
+```
+
+This command executes the model using the default selection, which is UnivFD. If you wish to use a different model, you can specify it using the `--modelName` flag. For example, to use the CNNDetect model, the command would be:
+
+```bash
+python test.py --dataPath <root_path_to_images> --modelName=CNNDetect
+```
+
+The models supported by this framework are listed in the table above. When selecting a model using the --modelName flag, ensure you use one of the valid names as specified below. These names correspond to the models' implementations and must be used exactly as shown to ensure proper function invocation:
+
+```python
+VALID_MODELS = ['CNNDetect', 'FreqDetect', 'Fusing', 'GramNet', 'LGrad', 'UnivFD', 'RPTC', 'Rine', 'DIMD', 'NPR', 'Dire']
+```
+
+You need also to define the path to the pretanined weights with the `--cptk` flag
+To run the model with pretrained weights, you must provide the path to these weights using the `--ckpt` flag. Ensure you replace `<path_to_pretrained_weights>` with the actual file path to your pretrained model weights.
+
+```bash
+python test.py --dataPath <root_path_to_images> --modelName=CNNDetect --cptk <path_to_pretrained_weights>
+
+```
+
+Replace `<root_path_to_images>` with the actual path to your directory of images, and `<path_to_pretrained_weights>` with the path to the pretrained weights file. 
+
+You can download the pretrained weights here: [Google Drive](URL_HERE)
+
+
+| Model Name    | Ptranined Weights File Name                                       | Description |
+|---------------|-------------------------------------------------------------------|-------------|
+| **CNNDetect** | weights/cnndetect/blur_jpg_prob0.1.pth                            |             |
+|               | weights/cnndetect/blur_jpg_prob0.5.pth                            |             |
+| **DIMD**      | weights/dimd/corvi22_latent_model.pth                             |             |
+|               | weights/dimd/corvi22_progan_model.pth                             |             |
+|               | weights/dimd/gandetection_resnet50nodown_progan.pth               |             |
+|               | weights/dimd/gandetection_resnet50nodown_stylegan2.pth            |             |
+| **Dire**      | weights/dire/lsun_adm.pth                                         |             |
+|               | weights/dire/lsun_iddpm.pth                                       |             |
+|               | weights/dire/lsun_pndm.pth                                        |             |
+|               | weights/dire/lsun_stylegan.pth                                    |             |
+| **FreqDetect**| weights/freqdetect/DCTAnalysis.pth                                |             |
+| **UnivFD**    | weights/univfd/fc_weights..pth                                    |             |
+| **Fusing**    | weights/fusing/PSM.pth                                            |             |
+| **GramNet**   | weights/gramnet/Gram.pth                                          |             |
+| **LGrad**     | weights/lgrad/LGrad-1class-Trainon-Progan_horse.pth               |             |
+|               | weights/lgrad/LGrad-2class-Trainon-Progan_chair_horse.pth         |             |
+|               | weights/lgrad/LGrad-4class-Trainon-Progan_car_cat_chair_horse.pth |             |
+|               | weights/lgrad/LGrad.pth                                           |             |
+| **LNP**       | weights/lnp/LNP.pth                                               |             |
+| **NPR**       | weights/npr/NPR.pth                                               |             |
+| **Rine**      | weights/rine/model_1class_trainable.pth                           |             |
+|               | weights/rine/model_2class_trainable.pth                           |             |
+|               | weights/rine/model_4class_trainable.pth                           |             |
+|               | weights/rine/model_ldm_trainable.pth                              |             |
+
+
+To save the predictions, specify an output file using the `--predictionsFile` flag. For example:
+
+```bash
+python test.py --dataPath <root_path_to_images> --predictionsFile <path_to_output_file>
+```
+
+#### Additional parameters
+
+To resize images, use the `--resizeSize` flag followed by the desired dimension. f no resize size is specified, the default behavior is to apply no resizing. For example, to resize images to 256x256 pixels, you would use:
+```bash
+--resizeSize=256
+```
+
+To crop images, utilize the `--cropSize` flag similarly. The default crop size is set to 256 pixels, meaning if no crop size is specified, images will be cropped to 256x256 pixels by default. For example, to crop images to 256x256 pixels, the correct flag is:
+```bash
+--cropSize=256
+```
+
+:warning: Important Note: For models such as `UnivFD` and `Rine`, which are based on CLIP, the input size must be set to 224x224 pixels due to CLIP's specific input size requirements. Therefore, use `--resizeSize=224` for these models. 
+
 
 ### Evaluate on a dataset
 
