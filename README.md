@@ -182,7 +182,7 @@ Alternatively, if you prefer a singular input path, you can use the `--dataPath`
 > :warning: Note: If your subdirectories are generated using different generative models and you wish to analyze the results separately for each model, be aware that the evaluation process aggregates all input from the directories under dataPath. This means you won't be able to automatically distinguish results by generative algorithm based solely on subdirectory structure.
 
 To conduct evaluations across various generative algorithms and accurately monitor the performance of each, it's recommended to bypass the use of `--realPath`, `--fakePath`, and `--dataPath` flags. Instead, direct modifications should be made to the dataset configuration file:
-Edit the [[dataset/dataset_paths.py]] file to specify the paths to your datasets, alongside information about generative model anf family. 
+Edit the [dataset/dataset_paths.py](dataset/dataset_paths.py) file to specify the paths to your datasets, alongside information about generative model anf family. 
 
 For example:
 ```python
