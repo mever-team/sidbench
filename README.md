@@ -89,32 +89,29 @@ Replace `<root_path_to_images>` with the actual path to your directory of images
 You can download the pretrained weights here: [Google Drive](URL_HERE)
 
 
-| Model Name    | Ptranined Weights File Name                                       | Description |
+| Model Name    | Ptranined Weights File Name                                       | Tranined On |
 |---------------|-------------------------------------------------------------------|-------------|
-| **CNNDetect** | weights/cnndetect/blur_jpg_prob0.1.pth                            |             |
-|               | weights/cnndetect/blur_jpg_prob0.5.pth                            |             |
-| **DIMD**      | weights/dimd/corvi22_latent_model.pth                             |             |
-|               | weights/dimd/corvi22_progan_model.pth                             |             |
-|               | weights/dimd/gandetection_resnet50nodown_progan.pth               |             |
-|               | weights/dimd/gandetection_resnet50nodown_stylegan2.pth            |             |
-| **Dire**      | weights/dire/lsun_adm.pth                                         |             |
-|               | weights/dire/lsun_iddpm.pth                                       |             |
-|               | weights/dire/lsun_pndm.pth                                        |             |
-|               | weights/dire/lsun_stylegan.pth                                    |             |
+| **CNNDetect** | weights/cnndetect/blur_jpg_prob0.1.pth                            | proGAN augmented (recompressed) with 10% probability |
+|               | weights/cnndetect/blur_jpg_prob0.5.pth                            | proGAN augmented (recompressed) with 50% probability |
+| **DIMD**      | weights/dimd/corvi22_latent_model.pth                             | Latent Diffusion |
+|               | weights/dimd/corvi22_progan_model.pth                             | proGAN |
+|               | weights/dimd/gandetection_resnet50nodown_stylegan2.pth            | styleGAN2 images |
+| **Dire**      | weights/dire/lsun_adm.pth                                         | adm (diffusion) |
+|               | weights/dire/lsun_iddpm.pth                                       | iddpm (Denoising diffusion probabilistic model) |
+|               | weights/dire/lsun_pndm.pth                                        | pndm (Pseudo Numerical Methods for Diffusion Models) |
+|               | weights/dire/lsun_stylegan.pth                                    | stylegan |
 | **FreqDetect**| weights/freqdetect/DCTAnalysis.pth                                |             |
-| **UnivFD**    | weights/univfd/fc_weights..pth                                    |             |
+| **UnivFD**    | weights/univfd/fc_weights..pth                                    | proGAN |
 | **Fusing**    | weights/fusing/PSM.pth                                            |             |
 | **GramNet**   | weights/gramnet/Gram.pth                                          |             |
-| **LGrad**     | weights/lgrad/LGrad-1class-Trainon-Progan_horse.pth               |             |
-|               | weights/lgrad/LGrad-2class-Trainon-Progan_chair_horse.pth         |             |
-|               | weights/lgrad/LGrad-4class-Trainon-Progan_car_cat_chair_horse.pth |             |
-|               | weights/lgrad/LGrad.pth                                           |             |
-| **LNP**       | weights/lnp/LNP.pth                                               |             |
+| **LGrad**     | weights/lgrad/LGrad-1class-Trainon-Progan_horse.pth               | proGAN with one class images |
+|               | weights/lgrad/LGrad-2class-Trainon-Progan_chair_horse.pth         | proGAN with two class images |
+|               | weights/lgrad/LGrad-4class-Trainon-Progan_car_cat_chair_horse.pth | proGAN with four class images |
 | **NPR**       | weights/npr/NPR.pth                                               |             |
-| **Rine**      | weights/rine/model_1class_trainable.pth                           |             |
-|               | weights/rine/model_2class_trainable.pth                           |             |
-|               | weights/rine/model_4class_trainable.pth                           |             |
-|               | weights/rine/model_ldm_trainable.pth                              |             |
+| **Rine**      | weights/rine/model_1class_trainable.pth                           | proGAN with one class images |
+|               | weights/rine/model_2class_trainable.pth                           | proGAN with two class images |
+|               | weights/rine/model_4class_trainable.pth                           | proGAN with four class images |
+|               | weights/rine/model_ldm_trainable.pth                              | latent diffusion with one class images |
 
 
 To save the predictions, specify an output file using the `--predictionsFile` flag. For example:
@@ -130,15 +127,14 @@ To resize images, use the `--resizeSize` flag followed by the desired dimension.
 --resizeSize=256
 ```
 
+> **Important Note on Resizing**: The impact of resizing on the results cannot be overstated. For certain models, resizing can significantly improve outcomes, while for others, it may detract from performance. This effect is closely tied to the original resolution of the input images. Specifically, in the case of high-resolution images, resizing becomes a crucial factor to consider. For a deeper insight into how resizing affects model performance, please refer to the Evaluation Section.
+
 To crop images, utilize the `--cropSize` flag similarly. The default crop size is set to 256 pixels, meaning if no crop size is specified, images will be cropped to 256x256 pixels by default. For example, to crop images to 256x256 pixels, the correct flag is:
 ```bash
 --cropSize=256
 ```
 
 :warning: Important Note: For models such as `UnivFD` and `Rine`, which are based on [CLIP](https://openai.com/research/clip), the input size must be set to 224x224 pixels due to CLIP's specific input size requirements. Therefore, use `--resizeSize=224` for these models. 
-
-
-> *Important Note on Resizing*: The impact of resizing on the results cannot be overstated. For certain models, resizing can significantly improve outcomes, while for others, it may detract from performance. This effect is closely tied to the original resolution of the input images. Specifically, in the case of high-resolution images, resizing becomes a crucial factor to consider. For a deeper insight into how resizing affects model performance, please refer to the Evaluation Section.
 
 ### Evaluate on a dataset
 
