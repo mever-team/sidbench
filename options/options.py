@@ -63,8 +63,8 @@ class EvalOptions():
         parser.add_argument('--family',  default=None, help='family of generative model: gan, deepfake, perceptual_loss, low_level_vision, diffusion')
         parser.add_argument('--maxSample', type=int, default=None, help='only check this number of images for both fake/real')
 
-        parser.add_argument('--modelName', type=str, default='UnivFD', help='One of CNNDetect, FreDetect, Fusing, GramNet, LGrad, UnivFD, RPTC, Rine, DIMD, NPR')    
-        parser.add_argument('--ckpt', type=str, default='./weights/univfd/fc_weights.pth', help='Must match with the selected model')
+        parser.add_argument('--modelName', type=str, default='Dire', help='One of CNNDetect, FreDetect, Fusing, GramNet, LGrad, UnivFD, RPTC, Rine, DIMD, NPR')    
+        parser.add_argument('--ckpt', type=str, default='./weights/dire/lsun_adm.pth', help='Must match with the selected model')
 
         parser.add_argument('--resultFolder', type=str, default='test_results', help='')
         

@@ -1,1 +1,11 @@
-
+scipy
+scikit-learn
+numpy
+Pillow
+numpyencoder
+matplotlib
+tqdm
+ftfy
+regex
+opencv-python
+blobfile
