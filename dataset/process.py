@@ -214,7 +214,8 @@ def reshape_image(imgs: torch.Tensor, image_size: int) -> torch.Tensor:
         imgs = crop_func(imgs)
     
     if imgs.shape[2] != image_size:
-        imgs = F.interpolate(imgs, size=(image_size, image_size), mode="bicubic")
+        imgs = F.resize(imgs, size=(image_size, image_size), interpolation=F.InterpolationMode.BICUBIC)
+        # imgs = F.interpolate(imgs, size=(image_size, image_size), mode="bicubic")
     return imgs
 
 
