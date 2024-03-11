@@ -207,4 +207,7 @@ DATASET_PATHS = [
 
 `source` is a reference to the source of the dataset. In the abobe example source [wang2020 dataset](https://github.com/PeterWang512/CNNDetection) used for training and testing the CNNDetect method. 
 
+# Contact
+Manos Schinas (manosetro@iti.gr)
+Symeon (Akis) Papadopoulos (papadop@iti.gr)
 
