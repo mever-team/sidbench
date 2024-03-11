@@ -134,8 +134,68 @@ To crop images, utilize the `--cropSize` flag similarly. The default crop size i
 --cropSize=256
 ```
 
-:warning: Important Note: For models such as `UnivFD` and `Rine`, which are based on [CLIP](https://openai.com/research/clip), the input size must be set to 224x224 pixels due to CLIP's specific input size requirements. Therefore, use `--resizeSize=224` for these models. 
+> :warning: Important Note: For models such as `UnivFD` and `Rine`, which are based on [CLIP](https://openai.com/research/clip), the input size must be set to 224x224 pixels due to CLIP's specific input size requirements. Therefore, use `--resizeSize=224` for these models. 
 
 ### Evaluate on a dataset
 
-This produces and saves several evaluation metrics, such as accuracy, average precision, and confusion matrix.
+You can run evaluations and save the results by executing the following command:
+
+```bash
+python validate.py --modelName=UnivFD --ckpt=./weights/univfd/fc_weights.pth --resultFolder=results/
+```
+
+This command uses the `UnivFD` model with its corresponding pretrained weights located at `./weights/univfd/fc_weights.pth`, and saves the results in the `results/` folder.
+
+You can utilize the same list of models and pretrained weights, adjusting the `--modelName` and `--ckpt` flags as needed. Similarly, you can modify the behavior for cropping and resizing according to your requirements.
+
+In addition, you can use the following flags to further process the images:
+
+`--jpegQuality`: Applies JPEG recompression with the defined quality level e.g. 95, 90, 50, ...
+`--gaussianSigma`: Applies Gaussian blurring with the defined sigma value e.g. 1,2,4.
+
+These flags allow for additional image transformation during evaluation, potentially influencing the model's performance based on your specific experimental setup.
+
+#### Input for evaluation 
+
+To specify the input paths for your evaluation, utilize the following options:
+`--realPath`: Use this flag to define the path to the directory containing real images.
+`--fakePath`: Use this flag to define the path to the directory containing fake (generated) images.
+
+For enhanced post-processing convenience, consider including the following flags in your metrics file generation:
+
+`--generativeModel`: Use this flag to specify the generative model used for creating the fake images e.g. *proGAN*. 
+`--family`: Utilize this flag to denote the family or category of the generative model e.g. *GAN*.
+
+By incorporating these flags, you can enrich your metrics files with valuable context, making subsequent analysis and interpretation of results more straightforward and insightful.
+
+Alternatively, if you prefer a singular input path, you can use the `--dataPath` flag. However, ensure that this directory contains subdirectories named `0_real` and `1_fake` for organizing real and fake images, respectively. The dataPath can contain multiple `0_real` and `1_fake` subdirecctories. 
+
+> :warning: Note: If your subdirectories are generated using different generative models and you wish to analyze the results separately for each model, be aware that the evaluation process aggregates all input from the directories under dataPath. This means you won't be able to automatically distinguish results by generative algorithm based solely on subdirectory structure.
+
+To conduct evaluations across various generative algorithms and accurately monitor the performance of each, it's recommended to bypass the use of `--realPath`, `--fakePath`, and `--dataPath` flags. Instead, direct modifications should be made to the dataset configuration file:
+Edit the [dataset/dataset_paths.py] file to specify the paths to your datasets, alongside information about generative model anf family. 
+
+For example:
+```python
+DATASET_PATHS = [
+    dict(
+        real_path='/path/to/real/images/for/this/dataset',
+        fake_path='/path/to/images/generated/by/biggan',
+        source='wang2020',
+        family='gan',
+        generative_model='biggan'
+    ),
+    dict(
+        real_path='/path/to/real/images/for/this/dataset',   
+        fake_path='/path/to/images/generated/by/cyclegan',
+        source='wang2020',
+        family='gan',
+        generative_model='cyclegan'
+    ),
+    ...
+]
+```
+
+`source` is a reference to the source of the dataset. In the abobe example source [wang2020 dataset](https://github.com/PeterWang512/CNNDetection) used for training and testing the CNNDetect method. 
+
+
