@@ -2,6 +2,7 @@ import argparse
 
 from dataset.dataset import RecursiveImageDataset
 from dataset.process import processing
+from dataset import patch_collate
 
 from models import get_model
 from options import TestOptions
@@ -9,7 +10,7 @@ import torch
 from tqdm import tqdm
 
 from utils.util import setup_device
-from dataset import patch_collate
+import csv
 
 
 if __name__ == '__main__':
@@ -35,23 +36,25 @@ if __name__ == '__main__':
                                          shuffle=False, 
                                          num_workers=opt.numThreads,
                                          collate_fn=collate_fn)
-    
-    all = 0
-    correct = 0
 
+    collected_predictions = []
     for img, label, img_path in tqdm(loader):
         # if list move each part to device
         if isinstance(img, list):
-            img = [i.to(device) for i in img]
+            img = [i.to(device) if isinstance(i, torch.Tensor) else i for i in img]
             predictions = model.predict(*img)
         else:
             img = img.to(device) 
-            predictions = model.predict(img)
-        
+            predictions = model.predict(img)        
 
         labels = [1 if p > 0.5 else 0 for p in predictions]
 
-        correct += sum(labels)
-        all += len(labels)
+        for path, prediction, label in zip(img_path, predictions, labels):
+            collected_predictions.append((path, prediction, label))
 
-    print('Accuracy: ', correct / all)
+    # write the collected data to a CSV file
+    with open(opt.predictionsFile, mode='w', newline='') as file:
+        writer = csv.writer(file)
+        writer.writerow(["Image Path", "Prediction", "Label"]) 
+        for data in collected_predictions:
+            writer.writerow(data)

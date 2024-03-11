@@ -5,6 +5,7 @@ from numpyencoder import NumpyEncoder
 
 from dataset.dataset import SyntheticImagesDataset
 from dataset.dataset_paths import DATASET_PATHS
+from dataset import patch_collate
 
 import shutil
 
@@ -23,49 +24,73 @@ from dataset.process import processing
 
 SEED = 0
 
-def format_metric(metric, p=2):
-    return str(round(metric*100, p))
-
-
 def write_metrics(output_folder, all_metrics):
     if os.path.exists(output_folder):
        shutil.rmtree(output_folder)
     os.makedirs(output_folder)
 
     with open( os.path.join(output_folder, 'ap.txt'), 'a') as f:
-        for metrics in all_metrics:
-            key = metrics['generative_model']
-            f.write(key + ': ' + format_metric(metrics['ap']) + '\n' )
+        headers = [['Generative', 'Average'], ['Model', 'Precision']]
+        column_widths = [12, 12] 
 
-    with open( os.path.join(output_folder, 'acc_05.txt'), 'a') as f:
+        for header_names in headers:
+            header_line = f"{header_names[0]:<{column_widths[0]}} {header_names[1]:>{column_widths[1]}}"
+            f.write(header_line + '\n')
+        f.write('-' * sum(column_widths) + '\n')
         for metrics in all_metrics:
-            key = metrics['generative_model']
+            key = metrics['generative_model'] if 'generative_model' in metrics and metrics['generative_model'] is not None else 'unknown'
+            ap_formatted = f"{metrics['ap']*100:6.2f}"
+            f.write(f"{key:<{12}} {ap_formatted:>{12}}" + '\n')
+
+    # Write accuracies to a file
+    with open( os.path.join(output_folder, 'acc_05.txt'), 'a') as f:
+        headers = [['Generative', 'TNR', 'TPR', ''], ['Model', '(Reals)', 'Fakes', 'Accuracy']]
+        column_widths = [12, 12, 12, 12] 
+
+        for header_names in headers:
+            header_line = f"{header_names[0]:<{column_widths[0]}} {header_names[1]:>{column_widths[1]}} {header_names[2]:>{column_widths[2]}} {header_names[3]:>{column_widths[3]}}"
+            f.write(header_line + '\n')
+        f.write('-' * sum(column_widths) + '\n')
+        for metrics in all_metrics:
+            key = metrics['generative_model'] if 'generative_model' in metrics and metrics['generative_model'] is not None else 'unknown'
             m = metrics['threshold_05']
-            f.write(key + ': ' + format_metric(m['r_acc'])  + '  ' + format_metric(m['f_acc']) + '  ' + format_metric(m['acc']) + '\n' )
+
+            # Formatting each metric with a specified precision (e.g., 2 decimal places)
+            r_acc_formatted = f"{m['r_acc']*100:6.2f}"  # Multiplies by 100 to convert to percentage
+            f_acc_formatted = f"{m['f_acc']*100:6.2f}"
+            acc_formatted = f"{m['acc']*100:6.2f}"
+            
+            data_line = f"{key:<{column_widths[0]}} {r_acc_formatted:>{column_widths[1]}} {f_acc_formatted:>{column_widths[2]}} {acc_formatted:>{column_widths[3]}}"
+            f.write(data_line + '\n')
 
     with open( os.path.join(output_folder, 'acc_oracle.txt'), 'a') as f:
+        headers = [['Generative', 'TNR', 'TPR', '', 'Best'], ['Model', '(Reals)', 'Fakes', 'Accuracy', 'Threshold']]
+        column_widths = [12, 12, 12, 12, 12] 
+
+        for header_names in headers:
+            header_line = f"{header_names[0]:<{column_widths[0]}} {header_names[1]:>{column_widths[1]}} {header_names[2]:>{column_widths[2]}} {header_names[3]:>{column_widths[3]}} {header_names[4]:>{column_widths[4]}}"
+            f.write(header_line + '\n')
+        f.write('-' * sum(column_widths) + '\n')
         for metrics in all_metrics:   
-            key = metrics['generative_model']
+            key = metrics['generative_model'] if 'generative_model' in metrics and metrics['generative_model'] is not None else 'unknown'
             m = metrics['oracle_threshold']
-            f.write(key + ': ' + format_metric(m['r_acc'])  + '  ' + format_metric(m['f_acc']) + '  ' + format_metric(m['acc']) + '\n' )
+            
+            # Formatting each metric with a specified precision (e.g., 2 decimal places)
+            r_acc_formatted = f"{m['r_acc']*100:6.2f}"  # Multiplies by 100 to convert to percentage
+            f_acc_formatted = f"{m['f_acc']*100:6.2f}"
+            acc_formatted = f"{m['acc']*100:6.2f}"
+            best_threshold = f"{metrics['best_threshold']:6.3f}"
 
-    with open( os.path.join(output_folder, 'roc_auc.txt'), 'a') as f:
-        for metrics in all_metrics:
-            key = metrics['generative_model']
-            f.write(key + ': ' + format_metric(metrics['roc_auc']) + '\n' )
-
-    with open( os.path.join(output_folder, 'best_threshold.txt'), 'a') as f:
-        for metrics in all_metrics:    
-            key = metrics['generative_model']
-            f.write(key + ': ' + str(round(metrics['best_threshold'], 3)) + '\n' )
+            data_line = f"{key:<{column_widths[0]}} {r_acc_formatted:>{column_widths[1]}} {f_acc_formatted:>{column_widths[2]}} {acc_formatted:>{column_widths[3]}} {best_threshold:>{column_widths[4]}}"
+            f.write(data_line + '\n')
     
     curves = [
         {
             'roc_curve': metrics.pop('roc_curve'), 
             'precision_recall_curve': metrics.pop('precision_recall_curve'),
-            'generative_model': metrics['generative_model'],
-            'source': metrics['source'],
-            'family': metrics['family']
+            'generative_model': metrics['generative_model'] if 'generative_model' in metrics and metrics['generative_model'] is not None else 'unknown',
+            'source': metrics['source'] if 'source' in metrics else 'unknown',
+            'family': metrics['family'] if 'family' in metrics else 'unknown'
         } 
         for metrics in all_metrics
     ]
@@ -79,10 +104,18 @@ def write_metrics(output_folder, all_metrics):
 
 def validate(model, loader, device, find_threshold=False):
     y_true, y_pred = [], []
-    for img, label in tqdm(loader):
-        img = img.to(device) 
+    for img, label, _ in tqdm(loader):
+        # if list move each part to device
+        if isinstance(img, list):
+            img = [
+                # i.to(device) if isinstance(i, torch.Tensor) else [j.to(device) for j in i]
+                i.to(device) if isinstance(i, torch.Tensor) else i for i in img
+            ]
+            predictions = model.predict(*img)
+        else:
+            img = img.to(device) 
+            predictions = model.predict(img)    
 
-        predictions = model.predict(img)
         y_pred.extend(predictions)
 
         y_true.extend(label.flatten().tolist())
@@ -93,8 +126,9 @@ def validate(model, loader, device, find_threshold=False):
 
 
 def run_for_model(datasets, model, opt):
-    
     device = setup_device(opt.gpus)
+
+    collate_fn = patch_collate if opt.modelName == 'Fusing' else None
 
     all_metrics = []
     for dataset_params in datasets:
@@ -103,11 +137,16 @@ def run_for_model(datasets, model, opt):
         data_paths = dataset_params['data_paths']
         dataset = SyntheticImagesDataset(data_paths=data_paths, opt=opt, process_fn=processing)
 
-        print('\t\t', dataset_params['source'], dataset_params['generative_model'], len(dataset))
+        source = dataset_params.get('source', 'N/A') or 'N/A'
+        generative_model = dataset_params.get('generative_model', 'N/A') or 'N/A'
+        dataset_length = len(dataset) if dataset is not None else 'N/A'
+        print(f'Source: {source:<20} Generative Model: {generative_model:<20} Dataset Length: {dataset_length:<15}')
+
         loader = torch.utils.data.DataLoader(dataset, 
                                              batch_size=opt.batchSize, 
                                              shuffle=False, 
-                                             num_workers=opt.numThreads)
+                                             num_workers=opt.numThreads,
+                                             collate_fn=collate_fn)
 
         metrics = validate(model, loader, device, find_threshold=True)
         metrics['source'] = dataset_params['source'] if 'source' in dataset_params else 'unknown'
@@ -128,7 +167,7 @@ if __name__ == '__main__':
 
     opt = parser.parse_args()
 
-    print('model: ', opt.modelName)
+    print('Model: ', opt.modelName)
 
     model = get_model(opt)
 

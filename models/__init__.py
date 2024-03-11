@@ -16,9 +16,6 @@ import torch
 from preprocessing.lgrad.models import build_model
 from utils.util import setup_device
 
-from preprocessing.dire.guided_diffusion.script_util import model_and_diffusion_defaults, create_model_and_diffusion
-from preprocessing.dire.guided_diffusion import dist_util
-
 
 VALID_MODELS = ['CNNDetect', 'FreqDetect', 'Fusing', 'GramNet', 'LGrad', 'UnivFD', 'RPTC', 'Rine', 'DIMD', 'NPR', 'Dire']
 
@@ -42,6 +39,7 @@ def get_model(opt):
         model = GramNet()
     elif model_name == 'LGrad':
         opt.numThreads = int(0)
+        opt.cropSize = 256
         gen_model = build_model(gan_type='stylegan', 
                                 module='discriminator', 
                                 resolution=256, 
@@ -58,6 +56,12 @@ def get_model(opt):
     elif model_name == 'DIMD':
         model = DIMD()
     elif model_name == 'Dire':
+        from preprocessing.dire.guided_diffusion.script_util import (
+            model_and_diffusion_defaults, 
+            create_model_and_diffusion
+        )
+        from preprocessing.dire.guided_diffusion import dist_util
+
         opt.numThreads = int(0)
         dire_args = model_and_diffusion_defaults()
         diffusion_model, diffusion = create_model_and_diffusion(**dire_args)

@@ -12,13 +12,13 @@ class TestOptions():
     def initialize(self, parser):
 
         parser.add_argument('--dataPath', type=str, default=None, help='dir name of data')
-        parser.add_argument('--modelName', type=str, default='Dire', help='One of CNNDetect, FreqDetect, Fusing, GramNet, LGrad, UnivFD, RPTC, Rine, DIMD, NPR, Dire')    
-        parser.add_argument('--ckpt', type=str, default='./weights/dire/lsun_adm.pth', help='Must match with the selected model')
+        parser.add_argument('--modelName', type=str, default='UnivFD', help='One of CNNDetect, FreqDetect, Fusing, GramNet, LGrad, UnivFD, RPTC, Rine, DIMD, NPR, Dire')    
+        parser.add_argument('--ckpt', type=str, default='./weights/univfd/fc_weights.pth', help='Must match with the selected model')
 
         parser.add_argument('--predictionsFile', type=str, default='predictions.csv', help='file to save predictions')
 
-        parser.add_argument('--loadSize', type=int, default=256, help='scale images to this size')
-        parser.add_argument('--cropSize', type=int, default=256, help='crop to this size')
+        parser.add_argument('--loadSize', type=int, default=None, help='scale images to this size')
+        parser.add_argument('--cropSize', type=int, default=224, help='crop to this size')
 
         parser.add_argument('--gpus', type=str, default='0', help='gpu ids: e.g. 0  0,1,2, 0,2. use -1 for CPU')
         parser.add_argument('--numThreads', default=1, type=int, help='# threads for loading data')
@@ -74,7 +74,7 @@ class EvalOptions():
         parser.add_argument('--gaussianSigma', type=int, default=None, help="0,1,2,3,4.     Used to test robustness of our model. Not apply if None")
 
         parser.add_argument('--loadSize', type=int, default=None, help='scale images to this size')
-        parser.add_argument('--cropSize', type=int, default=224, help='then crop to this size')
+        parser.add_argument('--cropSize', type=int, default=224, help='crop images to this size')
         parser.add_argument('--noResize', default=False, action='store_true')
         parser.add_argument('--noCrop', default=False, action='store_true')
 
@@ -82,6 +82,25 @@ class EvalOptions():
         parser.add_argument('--numThreads', default=4, type=int, help='# threads for loading data')
 
         parser.add_argument('--isTrain', default=False, type=bool, help='train or test')
+
+        # additional parameters
+
+        # RPTC
+        parser.add_argument('--patchNum', type=int, default=3)
+        
+        # FreqDetect
+        parser.add_argument('--dctMean', type=str, default='./weights/freqdetect/dct_mean')
+        parser.add_argument('--dctVar', type=str, default='./weights/freqdetect/dct_var')
+        
+        # LGrad
+        parser.add_argument('--LGradModelPath', type=str,default='./weights/preprocessing/karras2019stylegan-bedrooms-256x256_discriminator.pth', help='the path of LGrad pre-trained model')
+        parser.add_argument('--LGradGenerativeModel')
+
+        # Dire
+        parser.add_argument('--diffusion')
+        parser.add_argument('--diffusionModel')
+        parser.add_argument('--direArgs')
+
         self.initialized = True
 
         return parser
