@@ -135,8 +135,10 @@ To crop images, utilize the `--cropSize` flag similarly. The default crop size i
 --cropSize=256
 ```
 
-:warning: Important Note: For models such as `UnivFD` and `Rine`, which are based on CLIP, the input size must be set to 224x224 pixels due to CLIP's specific input size requirements. Therefore, use `--resizeSize=224` for these models. 
+:warning: Important Note: For models such as `UnivFD` and `Rine`, which are based on [CLIP](https://openai.com/research/clip), the input size must be set to 224x224 pixels due to CLIP's specific input size requirements. Therefore, use `--resizeSize=224` for these models. 
 
+
+> *Important Note on Resizing*: The impact of resizing on the results cannot be overstated. For certain models, resizing can significantly improve outcomes, while for others, it may detract from performance. This effect is closely tied to the original resolution of the input images. Specifically, in the case of high-resolution images, resizing becomes a crucial factor to consider. For a deeper insight into how resizing affects model performance, please refer to the Evaluation Section.
 
 ### Evaluate on a dataset
 
