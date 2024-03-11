@@ -45,7 +45,7 @@ def get_model(opt):
                                 resolution=256, 
                                 label_size=0, 
                                 image_channels=3)
-        gen_model.load_state_dict(torch.load(opt.LGradModelPath), strict=True)
+        gen_model.load_state_dict(torch.load(opt.LGradGenerativeModelPath), strict=True)
         gen_model = gen_model.to(device)
         opt.LGradGenerativeModel = gen_model
         model = LGrad()
@@ -71,7 +71,7 @@ def get_model(opt):
             num_samples=3998,
             batch_size=16,
             use_ddim=False,
-            model_path="./weights/preprocessing/lsun_bedroom.pt",
+            model_path=opt.DireGenerativeModelPath,
             real_step=0, 
             continue_reverse=False,
             has_subfolder=False,

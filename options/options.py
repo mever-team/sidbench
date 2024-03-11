@@ -36,10 +36,11 @@ class TestOptions():
         parser.add_argument('--dctVar', type=str, default='./weights/freqdetect/dct_var')
         
         # LGrad
-        parser.add_argument('--LGradModelPath', type=str,default='./weights/preprocessing/karras2019stylegan-bedrooms-256x256_discriminator.pth', help='the path of LGrad pre-trained model')
+        parser.add_argument('--LGradGenerativeModelPath', type=str,default='./weights/preprocessing/karras2019stylegan-bedrooms-256x256_discriminator.pth', help='the path of LGrad pre-trained model')
         parser.add_argument('--LGradGenerativeModel')
 
         # Dire
+        parser.add_argument('--DireGenerativeModelPath', type=str, default='./weights/preprocessing/lsun_bedroom.pt')
         parser.add_argument('--diffusion')
         parser.add_argument('--diffusionModel')
         parser.add_argument('--direArgs')
@@ -93,10 +94,11 @@ class EvalOptions():
         parser.add_argument('--dctVar', type=str, default='./weights/freqdetect/dct_var')
         
         # LGrad
-        parser.add_argument('--LGradModelPath', type=str,default='./weights/preprocessing/karras2019stylegan-bedrooms-256x256_discriminator.pth', help='the path of LGrad pre-trained model')
+        parser.add_argument('--LGradGenerativeModelPath', type=str, default='./weights/preprocessing/karras2019stylegan-bedrooms-256x256_discriminator.pth', help='the path of LGrad pre-trained model')
         parser.add_argument('--LGradGenerativeModel')
 
         # Dire
+        parser.add_argument('--DireGenerativeModelPath', type=str, default='./weights/preprocessing/lsun_bedroom.pt')
         parser.add_argument('--diffusion')
         parser.add_argument('--diffusionModel')
         parser.add_argument('--direArgs')

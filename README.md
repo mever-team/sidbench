@@ -2,9 +2,9 @@
 
 This project is a framework for benchmarking several state-of-the-art synthetic image detection models.
 
-## Installation
+## Setup
 
-## Install dependecies 
+### Install dependecies 
 
 Create a new environment named `pytorch_env`:
 
@@ -113,6 +113,16 @@ You can download the pretrained weights here: [Google Drive](URL_HERE)
 |               | weights/rine/model_4class_trainable.pth                           | proGAN with four class images |
 |               | weights/rine/model_ldm_trainable.pth                              | latent diffusion with one class images |
 
+Some models require additional parameters to be defined. 
+
+*FreqDetect* requires two additional files, which are to be specified by the flags `--dctMean` and `--dctVar`. By default, these are set to `./weights/freqdetect/dct_mean` and `./weights/freqdetect/dct_var`, respectively. If you have downloaded the weights directory and placed it in the root directory of the framework, these parameters can remain unchanged.
+
+*LGrad* requires the initialization of a StyleGAN discriminator, which is used to extract image gradients serving as image features. To specify the path to the pretrained discriminator, use the flag `--LGradGenerativeModelPath`. The default pretrained weights are provided in the file `karras2019stylegan-bedrooms-256x256_discriminator.pth`, located within the `./weights/preprocessing` directory.
+
+*Dire* requires the initialization of a diffusion generative model that extracts image features. To specify the path to the pretrained discriminator, use the flag `--DireGenerativeModelPath`. The default pretrained weights are provided in the file `lsun_bedroom.pt`, located within the `./weights/preprocessing` directory.
+
+
+#### Saving the predictions
 
 To save the predictions, specify an output file using the `--predictionsFile` flag. For example:
 
@@ -120,7 +130,7 @@ To save the predictions, specify an output file using the `--predictionsFile` fl
 python test.py --dataPath <root_path_to_images> --predictionsFile <path_to_output_file>
 ```
 
-#### Additional parameters
+#### Additional parameters for input preprocessing
 
 To resize images, use the `--resizeSize` flag followed by the desired dimension. f no resize size is specified, the default behavior is to apply no resizing. For example, to resize images to 256x256 pixels, you would use:
 ```bash
