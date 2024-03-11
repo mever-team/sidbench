@@ -76,8 +76,7 @@ The models supported by this framework are listed in the table above. When selec
 VALID_MODELS = ['CNNDetect', 'FreqDetect', 'Fusing', 'GramNet', 'LGrad', 'UnivFD', 'RPTC', 'Rine', 'DIMD', 'NPR', 'Dire']
 ```
 
-You need also to define the path to the pretanined weights with the `--cptk` flag
-To run the model with pretrained weights, you must provide the path to these weights using the `--ckpt` flag. Ensure you replace `<path_to_pretrained_weights>` with the actual file path to your pretrained model weights.
+You need also to define the path to the pretrained weights with the `--cptk` flag. Ensure you replace `<path_to_pretrained_weights>` with the actual file path to your pretrained model weights.
 
 ```bash
 python test.py --dataPath <root_path_to_images> --modelName=CNNDetect --cptk <path_to_pretrained_weights>
@@ -89,7 +88,7 @@ Replace `<root_path_to_images>` with the actual path to your directory of images
 You can download the pretrained weights here: [Google Drive](URL_HERE)
 
 
-| Model Name    | Ptranined Weights File Name                                       | Tranined On |
+| Model Name    | Pretrained Weights File Name                                       | Trained On |
 |---------------|-------------------------------------------------------------------|-------------|
 | **CNNDetect** | weights/cnndetect/blur_jpg_prob0.1.pth                            | proGAN augmented (recompressed) with 10% probability |
 |               | weights/cnndetect/blur_jpg_prob0.5.pth                            | proGAN augmented (recompressed) with 50% probability |
