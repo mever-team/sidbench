@@ -22,7 +22,7 @@ class TestOptions():
 
         parser.add_argument('--gpus', type=str, default='0', help='gpu ids: e.g. 0  0,1,2, 0,2. use -1 for CPU')
         parser.add_argument('--numThreads', default=1, type=int, help='# threads for loading data')
-        parser.add_argument('--batchSize', type=int, default=16)
+        parser.add_argument('--batchSize', type=int, default=64)
 
         parser.add_argument('--isTrain', default=False, type=bool, help='train or test')
         

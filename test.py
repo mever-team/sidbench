@@ -38,19 +38,22 @@ if __name__ == '__main__':
                                          collate_fn=collate_fn)
 
     collected_predictions = []
-    for img, label, img_path in tqdm(loader):
-        # if list move each part to device
-        if isinstance(img, list):
-            img = [i.to(device) if isinstance(i, torch.Tensor) else i for i in img]
-            predictions = model.predict(*img)
-        else:
-            img = img.to(device) 
-            predictions = model.predict(img)        
+    with tqdm(total=len(dataset)) as pbar:
+        for img, label, img_path in loader:
+            # if list move each part to device
+            if isinstance(img, list):
+                img = [i.to(device) if isinstance(i, torch.Tensor) else i for i in img]
+                predictions = model.predict(*img)
+            else:
+                img = img.to(device) 
+                predictions = model.predict(img)        
 
-        labels = [1 if p > 0.5 else 0 for p in predictions]
+            labels = [1 if p > 0.5 else 0 for p in predictions]
 
-        for path, prediction, label in zip(img_path, predictions, labels):
-            collected_predictions.append((path, prediction, label))
+            for path, prediction, label in zip(img_path, predictions, labels):
+                collected_predictions.append((path, prediction, label))
+            
+            pbar.update(len(labels))
 
     # write the collected data to a CSV file
     with open(opt.predictionsFile, mode='w', newline='') as file:

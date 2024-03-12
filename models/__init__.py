@@ -28,7 +28,8 @@ def get_model(opt):
     assert model_name in VALID_MODELS
     
     device = setup_device(opt.gpus)
-    
+    print("Device: ", device)
+
     if model_name == 'CNNDetect':
         model = CNNDetect()
     elif model_name == 'FreqDetect':
@@ -93,7 +94,7 @@ def get_model(opt):
         model = NPR()
     elif model_name == 'DeFake':
         opt.defakeBlip = blip_decoder(pretrained=opt.defakeBlipPath, image_size=224, vit='base')
-        opt.defakeClipEncoder = torch.load(opt.defakeClipEncoderPath)
+        opt.defakeClipEncoder = torch.load(opt.defakeClipEncoderPath, map_location='cpu')
         model = DeFake(blip=opt.defakeBlip, encoder=opt.defakeClipEncoder)
     elif model_name == 'Rine':
         pattern = r'model_([^_]*)_trainable'

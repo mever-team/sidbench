@@ -47,5 +47,6 @@ class DeFake(nn.Module):
     def predict(self, img):
         with torch.no_grad():
             output = self.forward(img)
-            predict = output.argmax(1)
+            predict = F.softmax(output)[:, 1:2]
+            # predict = output.argmax(1)
             return predict.flatten().tolist()

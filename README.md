@@ -146,7 +146,7 @@ To crop images, utilize the `--cropSize` flag similarly. The default crop size i
 --cropSize=256
 ```
 
-> :warning: Important Note: For models such as `UnivFD` and `Rine`, which are based on [CLIP](https://openai.com/research/clip), the input size must be set to 224x224 pixels due to CLIP's specific input size requirements. Therefore, use `--resizeSize=224` for these models. 
+> :warning: **Important Note:** For models such as `UnivFD` and `Rine`, which are based on [CLIP](https://openai.com/research/clip), the input size must be set to 224x224 pixels due to CLIP's specific input size requirements. Therefore, use `--resizeSize=224` for these models. 
 
 ### Evaluate on a dataset
 

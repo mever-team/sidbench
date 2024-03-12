@@ -102,23 +102,25 @@ def write_metrics(output_folder, all_metrics):
         json.dump(curves, f, indent=4, cls=NumpyEncoder)
 
 
-def validate(model, loader, device, find_threshold=False):
+def validate(model, loader, device, dataset_length, find_threshold=False):
     y_true, y_pred = [], []
-    for img, label, _ in tqdm(loader):
-        # if list move each part to device
-        if isinstance(img, list):
-            img = [
-                # i.to(device) if isinstance(i, torch.Tensor) else [j.to(device) for j in i]
-                i.to(device) if isinstance(i, torch.Tensor) else i for i in img
-            ]
-            predictions = model.predict(*img)
-        else:
-            img = img.to(device) 
-            predictions = model.predict(img)    
+    with tqdm(total=dataset_length) as pbar:
+        for img, label, _ in loader:
+            # if list move each part to device
+            if isinstance(img, list):
+                img = [
+                    # i.to(device) if isinstance(i, torch.Tensor) else [j.to(device) for j in i]
+                    i.to(device) if isinstance(i, torch.Tensor) else i for i in img
+                ]
+                predictions = model.predict(*img)
+            else:
+                img = img.to(device) 
+                predictions = model.predict(img)    
 
-        y_pred.extend(predictions)
-
-        y_true.extend(label.flatten().tolist())
+            y_pred.extend(predictions)
+            y_true.extend(label.flatten().tolist())
+            
+            pbar.update(len(predictions))
 
     y_true, y_pred = np.array(y_true), np.array(y_pred)
 
@@ -148,7 +150,7 @@ def run_for_model(datasets, model, opt):
                                              num_workers=opt.numThreads,
                                              collate_fn=collate_fn)
 
-        metrics = validate(model, loader, device, find_threshold=True)
+        metrics = validate(model, loader, device, dataset_length=dataset_length, find_threshold=True)
         metrics['source'] = dataset_params['source'] if 'source' in dataset_params else 'unknown'
         metrics['generative_model'] = dataset_params['generative_model'] if 'generative_model' in dataset_params else 'unknown'
         metrics['family'] = dataset_params['family'] if 'family' in dataset_params else 'unknown'
