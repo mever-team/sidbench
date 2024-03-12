@@ -9,15 +9,17 @@ from models.LGrad import LGrad
 from models.DIMD import DIMD
 from models.NPR import NPR
 from models.Dire import Dire
+from models.DeFake import DeFake
 
 import re
 import torch
 
+from networks.blip.blip import blip_decoder
 from preprocessing.lgrad.models import build_model
 from utils.util import setup_device
 
 
-VALID_MODELS = ['CNNDetect', 'FreqDetect', 'Fusing', 'GramNet', 'LGrad', 'UnivFD', 'RPTC', 'Rine', 'DIMD', 'NPR', 'Dire']
+VALID_MODELS = ['CNNDetect', 'FreqDetect', 'Fusing', 'GramNet', 'LGrad', 'UnivFD', 'RPTC', 'Rine', 'DIMD', 'NPR', 'Dire', 'DeFake']
 
 
 def get_model(opt):
@@ -89,6 +91,10 @@ def get_model(opt):
         model = Dire()
     elif model_name == 'NPR':
         model = NPR()
+    elif model_name == 'DeFake':
+        opt.defakeBlip = blip_decoder(pretrained=opt.defakeBlipPath, image_size=224, vit='base')
+        opt.defakeClipEncoder = torch.load(opt.defakeClipEncoderPath)
+        model = DeFake(blip=opt.defakeBlip, encoder=opt.defakeClipEncoder)
     elif model_name == 'Rine':
         pattern = r'model_([^_]*)_trainable'
         match = re.search(pattern, opt.ckpt)

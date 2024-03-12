@@ -45,6 +45,12 @@ class TestOptions():
         parser.add_argument('--diffusionModel')
         parser.add_argument('--direArgs')
 
+        # DeFake
+        parser.add_argument('--defakeClipEncoderPath', type=str,default='./weights/defake/finetune_clip.pt', help='the path of defake clip encoder model')
+        parser.add_argument('--defakeClipEncode')
+        parser.add_argument('--defakeBlipPath', type=str,default='./weights/defake/model_base_capfilt_large.pth', help='the path of defake blip model')
+        parser.add_argument('--defakeBlip')
+
         self.initialized = True
         
         return parser
@@ -64,17 +70,17 @@ class EvalOptions():
         parser.add_argument('--family',  default=None, help='family of generative model: gan, deepfake, perceptual_loss, low_level_vision, diffusion')
         parser.add_argument('--maxSample', type=int, default=None, help='only check this number of images for both fake/real')
 
-        parser.add_argument('--modelName', type=str, default='Dire', help='One of CNNDetect, FreDetect, Fusing, GramNet, LGrad, UnivFD, RPTC, Rine, DIMD, NPR')    
-        parser.add_argument('--ckpt', type=str, default='./weights/dire/lsun_adm.pth', help='Must match with the selected model')
+        parser.add_argument('--modelName', type=str, default='DeFake', help='One of CNNDetect, FreDetect, Fusing, GramNet, LGrad, UnivFD, RPTC, Rine, DIMD, NPR')    
+        parser.add_argument('--ckpt', type=str, default='./weights/defake/clip_linear.pth', help='Must match with the selected model')
 
         parser.add_argument('--resultFolder', type=str, default='test_results', help='')
         
-        parser.add_argument('--batchSize', type=int, default=32)
+        parser.add_argument('--batchSize', type=int, default=64)
 
         parser.add_argument('--jpegQuality', type=int, default=None, help="100, 90, 80, ... 30. Used to test robustness of our model. Not apply if None")
         parser.add_argument('--gaussianSigma', type=int, default=None, help="0,1,2,3,4.     Used to test robustness of our model. Not apply if None")
 
-        parser.add_argument('--loadSize', type=int, default=None, help='scale images to this size')
+        parser.add_argument('--loadSize', type=int, default=256, help='scale images to this size')
         parser.add_argument('--cropSize', type=int, default=224, help='crop images to this size')
         parser.add_argument('--noResize', default=False, action='store_true')
         parser.add_argument('--noCrop', default=False, action='store_true')
@@ -102,6 +108,12 @@ class EvalOptions():
         parser.add_argument('--diffusion')
         parser.add_argument('--diffusionModel')
         parser.add_argument('--direArgs')
+
+        # DeFake
+        parser.add_argument('--defakeClipEncoderPath', type=str,default='./weights/defake/finetune_clip.pt', help='the path of defake clip encoder model')
+        parser.add_argument('--defakeClipEncode')
+        parser.add_argument('--defakeBlipPath', type=str,default='./weights/defake/model_base_capfilt_large.pth', help='the path of defake blip model')
+        parser.add_argument('--defakeBlip')
 
         self.initialized = True
 

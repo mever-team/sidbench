@@ -16,7 +16,6 @@ from models import VALID_MODELS
 
 from utils.util import setup_device
 
-
 MEAN = { 
     "imagenet":[0.485, 0.456, 0.406], 
     "clip":[0.48145466, 0.4578275, 0.40821073] 
@@ -300,6 +299,28 @@ def normalize(img):
     return img * 255. 
 
 
+def defake_processing(img, opt):
+
+    transformations = []
+
+    if opt.loadSize:
+        transformations.append(transforms.Resize(size=(opt.loadSize, opt.loadSize)))
+
+    if opt.isTrain:
+        crop_func = transforms.RandomCrop(opt.cropSize)
+    else:
+        crop_func = transforms.CenterCrop(opt.cropSize)
+
+    transformations.append(crop_func)
+    transformations.append(transforms.ToTensor())
+    transformations.append(transforms.Normalize(mean=MEAN['clip'], std=STD['clip']))
+    
+    transform = transforms.Compose(transformations)
+    img = transform(img)
+
+    return img
+
+
 def processing(img, opt, label, image_path):
     assert opt.modelName in VALID_MODELS
 
@@ -336,6 +357,9 @@ def processing(img, opt, label, image_path):
     
     if opt.modelName == 'Dire':
         return dire_processing(img, opt), label, image_path
+    
+    if opt.modelName == 'DeFake':
+        return defake_processing(img, opt), label, image_path
     
     raise ValueError(f"Model {opt.modelName} not found")
 

@@ -9,3 +9,6 @@ ftfy
 regex
 opencv-python
 blobfile
+timm
+transformers
+fairscale
