@@ -127,6 +127,30 @@ def validate(model, loader, device, dataset_length, find_threshold=False):
     return calculate_performance_metrics(y_true, y_pred, find_threshold)
 
 
+def get_results_path(opt):
+    components = []
+
+    if opt.cropSize is not None:
+        components.append(f"crop_{opt.cropSize}")
+    else:
+        components.append("noCrop")
+
+    if opt.loadSize is not None:
+        components.append(f"resize_{opt.loadSize}")
+    else:
+        components.append("noResize")
+
+    if opt.jpegQuality is not None:
+        components.append(f"jpeg_{opt.jpegQuality}")
+
+    if opt.gaussianSigma is not None:
+        components.append(f"gaussian_{opt.gaussianSigma}")
+
+    output_folder = os.path.join(opt.resultFolder, opt.modelName, '_'.join(components))
+    return output_folder
+
+
+
 def run_for_model(datasets, model, opt):
     device = setup_device(opt.gpus)
 
@@ -157,8 +181,7 @@ def run_for_model(datasets, model, opt):
 
         all_metrics.append(metrics)
 
-    output_folder = os.path.join(opt.resultFolder, opt.modelName, '_jpeg_' + str(opt.jpegQuality) + '_gaussian_' + str(opt.gaussianSigma))
-    
+    output_folder = get_results_path(opt)
     write_metrics(output_folder, all_metrics)
 
 
@@ -168,8 +191,6 @@ if __name__ == '__main__':
     parser = EvalOptions().initialize(parser)
 
     opt = parser.parse_args()
-
-    print('Model: ', opt.modelName)
 
     model = get_model(opt)
 

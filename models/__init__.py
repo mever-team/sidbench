@@ -28,6 +28,7 @@ def get_model(opt):
     assert model_name in VALID_MODELS
     
     device = setup_device(opt.gpus)
+    print('Model: ', opt.modelName)
     print("Device: ", device)
 
     if model_name == 'CNNDetect':

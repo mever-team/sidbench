@@ -2,6 +2,13 @@
 
 This project is a framework for benchmarking several state-of-the-art synthetic image detection models.
 
+# News
+
+<!-- :boom: **29/3/2024** Release traning code -->
+
+:sparkles: **12/3/2024** Integrate [DeFake](https://github.com/zeyangsha/De-Fake) model
+
+
 ## Setup
 
 ### Install dependecies 
@@ -210,7 +217,16 @@ DATASET_PATHS = [
 
 `source` is a reference to the source of the dataset. In the abobe example source [wang2020 dataset](https://github.com/PeterWang512/CNNDetection) used for training and testing the CNNDetect method. 
 
+## Datasets for evaluation 
+
+
+# Training 
+
+TODO: 
+
 # Contact
+
 Manos Schinas (manosetro@iti.gr)
+
 Symeon (Akis) Papadopoulos (papadop@iti.gr)
 
