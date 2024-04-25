@@ -1,4 +1,4 @@
-# Synthetic Image Detection Benchmark
+# SIDBench: A Synthetic Image Detection Benchmark
 
 This project is a framework for benchmarking several state-of-the-art synthetic image detection models.
 
