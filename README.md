@@ -93,7 +93,7 @@ python test.py --dataPath <root_path_to_images> --modelName=CNNDetect --cptk <pa
 
 Replace `<root_path_to_images>` with the actual path to your directory of images, and `<path_to_pretrained_weights>` with the path to the pretrained weights file. 
 
-You can download the pretrained weights here: [Google Drive](URL_HERE)
+You can download the pretrained weights here: [Google Drive](https://drive.google.com/file/d/1YuJ2so_1LgOSRjJUqZL-L2EQmuJcdxQh/view?usp=sharing)
 
 
 | Model Name    | Pretrained Weights File Name                                       | Trained On |
