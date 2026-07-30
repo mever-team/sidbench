@@ -32,8 +32,8 @@ class TestOptions():
         parser.add_argument('--patchNum', type=int, default=3)
         
         # FreqDetect
-        parser.add_argument('--dctMean', type=str, default='./weights/freqdetect/dct_mean')
-        parser.add_argument('--dctVar', type=str, default='./weights/freqdetect/dct_var')
+        parser.add_argument('--dctMean', type=str, default='./weights/freqdetect/dct_mean.zip')
+        parser.add_argument('--dctVar', type=str, default='./weights/freqdetect/dct_var.zip')
         
         # LGrad
         parser.add_argument('--LGradGenerativeModelPath', type=str,default='./weights/preprocessing/karras2019stylegan-bedrooms-256x256_discriminator.pth', help='the path of LGrad pre-trained model')
@@ -96,8 +96,8 @@ class EvalOptions():
         parser.add_argument('--patchNum', type=int, default=3)
         
         # FreqDetect
-        parser.add_argument('--dctMean', type=str, default='./weights/freqdetect/dct_mean')
-        parser.add_argument('--dctVar', type=str, default='./weights/freqdetect/dct_var')
+        parser.add_argument('--dctMean', type=str, default='./weights/freqdetect/dct_mean.zip')
+        parser.add_argument('--dctVar', type=str, default='./weights/freqdetect/dct_var.zip')
         
         # LGrad
         parser.add_argument('--LGradGenerativeModelPath', type=str, default='./weights/preprocessing/karras2019stylegan-bedrooms-256x256_discriminator.pth', help='the path of LGrad pre-trained model')

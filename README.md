@@ -102,16 +102,18 @@ You can download the pretrained weights here: [Google Drive](https://drive.googl
 |               | weights/cnndetect/blur_jpg_prob0.5.pth                            | proGAN augmented (recompressed) with 50% probability |
 | **DIMD**      | weights/dimd/corvi22_latent_model.pth                             | Latent Diffusion |
 |               | weights/dimd/corvi22_progan_model.pth                             | proGAN |
+|               | weights/dimd/gandetection_resnet50nodown_progan.pth               | proGAN images |
 |               | weights/dimd/gandetection_resnet50nodown_stylegan2.pth            | styleGAN2 images |
 | **Dire**      | weights/dire/lsun_adm.pth                                         | adm (diffusion) |
 |               | weights/dire/lsun_iddpm.pth                                       | iddpm (Denoising diffusion probabilistic model) |
 |               | weights/dire/lsun_pndm.pth                                        | pndm (Pseudo Numerical Methods for Diffusion Models) |
 |               | weights/dire/lsun_stylegan.pth                                    | stylegan |
 | **FreqDetect**| weights/freqdetect/DCTAnalysis.pth                                |             |
-| **UnivFD**    | weights/univfd/fc_weights..pth                                    | proGAN |
+| **UnivFD**    | weights/univfd/fc_weights.pth                                     | proGAN |
 | **Fusing**    | weights/fusing/PSM.pth                                            |             |
 | **GramNet**   | weights/gramnet/Gram.pth                                          |             |
-| **LGrad**     | weights/lgrad/LGrad-1class-Trainon-Progan_horse.pth               | proGAN with one class images |
+| **LGrad**     | weights/lgrad/LGrad.pth                                           | proGAN |
+|               | weights/lgrad/LGrad-1class-Trainon-Progan_horse.pth               | proGAN with one class images |
 |               | weights/lgrad/LGrad-2class-Trainon-Progan_chair_horse.pth         | proGAN with two class images |
 |               | weights/lgrad/LGrad-4class-Trainon-Progan_car_cat_chair_horse.pth | proGAN with four class images |
 | **NPR**       | weights/npr/NPR.pth                                               |             |
@@ -124,7 +126,7 @@ You can download the pretrained weights here: [Google Drive](https://drive.googl
 
 Some models require additional parameters to be defined. 
 
-*FreqDetect* requires two additional files, which are to be specified by the flags `--dctMean` and `--dctVar`. By default, these are set to `./weights/freqdetect/dct_mean` and `./weights/freqdetect/dct_var`, respectively. If you have downloaded the weights directory and placed it in the root directory of the framework, these parameters can remain unchanged.
+*FreqDetect* requires two additional files, which are to be specified by the flags `--dctMean` and `--dctVar`. By default, these are set to `./weights/freqdetect/dct_mean.zip` and `./weights/freqdetect/dct_var.zip`, respectively. If you have downloaded the weights directory and placed it in the root directory of the framework, these parameters can remain unchanged.
 
 *LGrad* requires the initialization of a StyleGAN discriminator, which is used to extract image gradients serving as image features. To specify the path to the pretrained discriminator, use the flag `--LGradGenerativeModelPath`. The default pretrained weights are provided in the file `karras2019stylegan-bedrooms-256x256_discriminator.pth`, located within the `./weights/preprocessing` directory.
 
