@@ -10,6 +10,7 @@ from models.DIMD import DIMD
 from models.NPR import NPR
 from models.Dire import Dire
 from models.DeFake import DeFake
+from models.RAIW import RAIWModel
 
 import re
 import torch
@@ -19,7 +20,7 @@ from preprocessing.lgrad.models import build_model
 from utils.util import setup_device
 
 
-VALID_MODELS = ['CNNDetect', 'FreqDetect', 'Fusing', 'GramNet', 'LGrad', 'UnivFD', 'RPTC', 'Rine', 'DIMD', 'NPR', 'Dire', 'DeFake']
+VALID_MODELS = ['CNNDetect', 'FreqDetect', 'Fusing', 'GramNet', 'LGrad', 'UnivFD', 'RPTC', 'Rine', 'DIMD', 'NPR', 'Dire', 'DeFake', 'RAIW']
 
 
 def get_model(opt):
@@ -118,6 +119,8 @@ def get_model(opt):
             nproj = 4
             proj_dim = 1024
         model = RineModel(backbone=("ViT-L/14", 1024), nproj=nproj, proj_dim=proj_dim)
+    elif model_name == 'RAIW':
+        model = RAIWModel()
 
     model.load_weights(ckpt=opt.ckpt)
     model.eval()

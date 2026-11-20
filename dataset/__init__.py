@@ -13,3 +13,10 @@ def patch_collate(batch):
         return [input_img, cropped_img, scale], target, filename
     except Exception as e:
         raise ValueError('Error in patch_collate: ' + str(e))
+
+
+def pil_collate(batch):
+    imgs = [item[0] for item in batch]
+    target = torch.tensor([item[1] for item in batch])
+    filename = [item[2] for item in batch]
+    return [imgs], target, filename
