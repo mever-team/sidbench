@@ -13,3 +13,4 @@ timm
 transformers
 fairscale
 git+https://github.com/openai/CLIP.git
+remove-ai-watermarks[source-classify]>=0.64.0

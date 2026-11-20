@@ -71,6 +71,11 @@ MODELS = [
         "modelName": "Dire",
         "trainedOn": "progan",
         "ckpt": "./weights/gramnet/Gram.pth"
+    },
+    {
+        "modelName": "RAIW",
+        "trainedOn": "multi_provider_10",
+        "ckpt": "hub"
     }
 ]
 

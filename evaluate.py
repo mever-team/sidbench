@@ -5,7 +5,7 @@ from numpyencoder import NumpyEncoder
 
 from dataset.dataset import SyntheticImagesDataset
 from dataset.dataset_paths import DATASET_PATHS
-from dataset import patch_collate
+from dataset import patch_collate, pil_collate
 
 import shutil
 
@@ -154,7 +154,7 @@ def get_results_path(opt):
 def run_for_model(datasets, model, opt):
     device = setup_device(opt.gpus)
 
-    collate_fn = patch_collate if opt.modelName == 'Fusing' else None
+    collate_fn = patch_collate if opt.modelName == 'Fusing' else (pil_collate if opt.modelName == 'RAIW' else None)
 
     all_metrics = []
     for dataset_params in datasets:

@@ -360,7 +360,10 @@ def processing(img, opt, label, image_path):
     
     if opt.modelName == 'DeFake':
         return defake_processing(img, opt), label, image_path
-    
+
+    if opt.modelName == 'RAIW':
+        return img, label, image_path
+
     raise ValueError(f"Model {opt.modelName} not found")
 
 

@@ -2,7 +2,7 @@ import argparse
 
 from dataset.dataset import RecursiveImageDataset
 from dataset.process import processing
-from dataset import patch_collate
+from dataset import patch_collate, pil_collate
 
 from models import get_model
 from options import TestOptions
@@ -28,7 +28,7 @@ if __name__ == '__main__':
     
     model = get_model(opt)
 
-    collate_fn = patch_collate if opt.modelName == 'Fusing' else None
+    collate_fn = patch_collate if opt.modelName == 'Fusing' else (pil_collate if opt.modelName == 'RAIW' else None)
 
     dataset = RecursiveImageDataset(data_path=opt.dataPath, opt=opt, process_fn=processing)
     loader = torch.utils.data.DataLoader(dataset, 
