@@ -10,6 +10,7 @@ regex
 opencv-python
 blobfile
 timm
-transformers
+transformers<5
 fairscale
+pyyaml
 git+https://github.com/openai/CLIP.git

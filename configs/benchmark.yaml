@@ -1,0 +1,73 @@
+# Settings for benchmark.py: evaluate every listed detector on every listed dataset, first on the
+# clean images and then under each listed degradation.
+#
+#   python benchmark.py --config configs/benchmark.yaml
+#
+# Flags on the command line override the single values here, e.g. add --gpus -1 to run on the CPU.
+# Relative paths are relative to the folder you run the command from.
+# Without a config file, benchmark.py uses the models in models/models.py and needs --dataRoot,
+# --dataPath or --realPath/--fakePath for the data.
+
+# Results go to <resultFolder>/<trainedOn>/<modelName>/<preprocessing and degradation settings>/
+resultFolder: results
+
+# Resize images to loadSize x loadSize (null = no resizing), then crop the centre to cropSize.
+# LGrad always uses cropSize 256, whatever is set here.
+loadSize: null #256
+cropSize: 224
+
+# Use at most this many real and this many fake images from each dataset (null = all)
+maxSample: null
+
+# GPU id, or -1 for the CPU
+gpus: 0
+batchSize: 64
+numThreads: 4
+
+# Dataset with one subfolder per generator, each containing 0_real and 1_fake folders (they can be
+# nested, e.g. progan/car/0_real). Each generator gets its own row in the results, labelled with the
+# subfolder's name. source names the dataset in the results; null uses the folder's name.
+# family is looked up in configs/families.yaml.
+dataRoot: path/to/dataset
+source: null
+
+# Instead of dataRoot, you can list the datasets one by one (set dataRoot to null). When real_path and
+# fake_path are different folders, every image in real_path counts as real and every image in fake_path
+# as fake. Setting source then runs only the entries with that source.
+#
+# datasets:
+#   - real_path: path/to/real_photos
+#     fake_path: path/to/stable_diffusion_images
+#     source: my_data
+#     family: diffusion
+#     generative_model: stable-diffusion-xl
+
+# Detectors to run. trainedOn names a subfolder of the results, so each modelName + trainedOn pair
+# must be unique. Dire also needs the mpi4py package (see the README).
+models:
+  - {modelName: UnivFD, trainedOn: progan, ckpt: ./weights/univfd/fc_weights.pth}
+  - {modelName: CNNDetect, trainedOn: progan, ckpt: ./weights/cnndetect/blur_jpg_prob0.5.pth}
+  - {modelName: DIMD, trainedOn: latent_diffusion, ckpt: ./weights/dimd/corvi22_latent_model.pth}
+  - {modelName: DIMD, trainedOn: progan, ckpt: ./weights/dimd/corvi22_progan_model.pth}
+  - {modelName: DIMD, trainedOn: stylegan2, ckpt: ./weights/dimd/gandetection_resnet50nodown_stylegan2.pth}
+  - {modelName: LGrad, trainedOn: progan, ckpt: ./weights/lgrad/LGrad.pth}
+  - {modelName: FreqDetect, trainedOn: progan, ckpt: ./weights/freqdetect/DCTAnalysis.pth}
+  - {modelName: Rine, trainedOn: progan, ckpt: ./weights/rine/model_1class_trainable.pth}
+  - {modelName: Rine, trainedOn: latent_diffusion, ckpt: ./weights/rine/model_ldm_trainable.pth}
+  - {modelName: NPR, trainedOn: progan, ckpt: ./weights/npr/NPR.pth}
+  - {modelName: RPTC, trainedOn: progan, ckpt: ./weights/rptc/RPTC.pth}
+  - {modelName: Fusing, trainedOn: progan, ckpt: ./weights/fusing/PSM.pth}
+  - {modelName: GramNet, trainedOn: progan, ckpt: ./weights/gramnet/Gram.pth}
+  - {modelName: Dire, trainedOn: adm, ckpt: ./weights/dire/lsun_adm.pth}
+
+# Image degradations applied on top of the clean run ({} = clean images).
+# jpegQuality recompresses as JPEG at that quality; gaussianSigma blurs with that sigma.
+degradations:
+  - {}
+  - {jpegQuality: 95}
+  - {jpegQuality: 90}
+  - {jpegQuality: 50}
+  - {jpegQuality: 30}
+  - {gaussianSigma: 2}
+  - {gaussianSigma: 4}
+  - {jpegQuality: 50, gaussianSigma: 2}

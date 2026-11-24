@@ -185,46 +185,91 @@ These flags allow for additional image transformation during evaluation, potenti
 
 #### Input for evaluation 
 
-To specify the input paths for your evaluation, utilize the following options:
-`--realPath`: Use this flag to define the path to the directory containing real images.
-`--fakePath`: Use this flag to define the path to the directory containing fake (generated) images.
+There are four ways to tell `evaluate.py` and `benchmark.py` where the images are:
 
-For enhanced post-processing convenience, consider including the following flags in your metrics file generation:
+| Option | Give it | Results |
+|---|---|---|
+| `--dataRoot` | a dataset folder with one subfolder per generator, each containing `0_real` and `1_fake` folders | one row per generator |
+| `--dataPath` | a folder containing `0_real` and `1_fake` folders | one row |
+| `--realPath` and `--fakePath` | any folder of real images and any folder of fake images | one row |
+| a `datasets` list in a [config file](#use-a-configuration-file) | several folders, each in any of the layouts above | one row per entry |
 
-`--generativeModel`: Use this flag to specify the generative model used for creating the fake images e.g. *proGAN*. 
-`--family`: Utilize this flag to denote the family or category of the generative model e.g. *GAN*.
+**`--dataRoot`** is the easiest way to evaluate a published dataset. For example, the [wang2020 test set](https://github.com/PeterWang512/CNNDetection) unzips to:
 
-By incorporating these flags, you can enrich your metrics files with valuable context, making subsequent analysis and interpretation of results more straightforward and insightful.
-
-Alternatively, if you prefer a singular input path, you can use the `--dataPath` flag. However, ensure that this directory contains subdirectories named `0_real` and `1_fake` for organizing real and fake images, respectively. The dataPath can contain multiple `0_real` and `1_fake` subdirecctories. 
-
-> :warning: Note: If your subdirectories are generated using different generative models and you wish to analyze the results separately for each model, be aware that the evaluation process aggregates all input from the directories under dataPath. This means you won't be able to automatically distinguish results by generative algorithm based solely on subdirectory structure.
-
-To conduct evaluations across various generative algorithms and accurately monitor the performance of each, it's recommended to bypass the use of `--realPath`, `--fakePath`, and `--dataPath` flags. Instead, direct modifications should be made to the dataset configuration file:
-Edit the [dataset/dataset_paths.py](dataset/dataset_paths.py) file to specify the paths to your datasets, alongside information about generative model anf family. 
-
-For example:
-```python
-DATASET_PATHS = [
-    dict(
-        real_path='/path/to/real/images/for/this/dataset',
-        fake_path='/path/to/images/generated/by/biggan',
-        source='wang2020',
-        family='gan',
-        generative_model='biggan'
-    ),
-    dict(
-        real_path='/path/to/real/images/for/this/dataset',   
-        fake_path='/path/to/images/generated/by/cyclegan',
-        source='wang2020',
-        family='gan',
-        generative_model='cyclegan'
-    ),
-    ...
-]
+```
+CNN_synth_testset/
+├── biggan/0_real, biggan/1_fake
+├── progan/airplane/0_real, progan/airplane/1_fake, progan/bicycle/...
+└── ...
 ```
 
-`source` is a reference to the source of the dataset. In the abobe example source [wang2020 dataset](https://github.com/PeterWang512/CNNDetection) used for training and testing the CNNDetect method. 
+```bash
+python evaluate.py --dataRoot /path/to/CNN_synth_testset --source wang2020
+```
+
+Each subfolder (`biggan`, `progan`, ...) is scored separately and labelled with its name. The `0_real` and `1_fake` folders can be nested at any depth inside it, as in `progan`. Folders whose names start with a dot are skipped.
+
+**`--dataPath`** treats everything under the folder as one dataset: images with `0_real` in their path below the folder are real, and images with `1_fake` are fake. `0_real` and `1_fake` count as a whole folder name, or as a part of a file name set off by `_`, `-` or `.`, e.g. `img_7_0_real.png` or `0_real_34.png`. They don't count when attached to other letters or digits, so `img_10_real.png` (where the `0` belongs to `10`) is not labelled real by accident.
+
+**`--realPath` and `--fakePath`** take any two folders: every image under `--realPath` is real and every image under `--fakePath` is fake, whatever the folders and files are called. If one of them uses the `0_real`/`1_fake` naming, only the images named that way are used from it (the real folder's `0_real` images, the fake folder's `1_fake` images), so you can also point both at folders laid out for `--dataPath`. If both are the same folder, it works like `--dataPath`.
+
+Images are searched in all subfolders. Files ending in `.png`, `.jpg`, `.jpeg` or `.bmp`, in any upper or lower case, are used.
+
+Before any model is loaded, the script prints how many real and fake images it found for each dataset, with notes about images it found but did not use (e.g. `using 100 of 1000 images, only those named 0_real`). It then stops with a list of every problem it found: missing folders, datasets without real or without fake images, images that count as both, and a real folder holding images named `1_fake` but none named `0_real` (or the reverse), which usually means the two folders were swapped.
+
+#### Labels saved with the results
+
+Every result row is saved in `metrics.json` with three labels, used by the scripts in [scripts/](scripts/) to average and plot results:
+
+* `generative_model`: what made the fake images, e.g. *biggan*. With `--dataRoot`, the subfolder's name; otherwise set with `--generativeModel`.
+* `source`: the dataset the images come from, e.g. *wang2020*. With `--dataRoot`, it defaults to the folder's name, and `--source` replaces it. With `--dataPath` or `--realPath`/`--fakePath`, set it with `--source`. With a `datasets` list, `--source` instead runs only the entries with that source.
+* `family`: the type of generator, e.g. *gan* or *diffusion*, so results can be averaged per type. If it is not given (with `--family` or in a `datasets` entry), it is looked up by the generator's name in [configs/families.yaml](configs/families.yaml), which lists the generators of each family; generators not listed get *unknown*. Add your own generators there.
+
+### Run a benchmark
+
+`benchmark.py` evaluates several models on several datasets, first on the clean images and then under JPEG compression and Gaussian blur:
+
+```bash
+python benchmark.py --config configs/benchmark.yaml
+```
+
+The config file lists the datasets, the models with their pretrained weights, and the degradations to apply. Results are saved under `<resultFolder>/<trainedOn>/<modelName>/`, so different checkpoints of the same model are kept apart. Without a config file, the script uses the models listed in [models/models.py](models/models.py); give the data with `--dataRoot`, `--dataPath`, or `--realPath` and `--fakePath`, as described in [Input for evaluation](#input-for-evaluation).
+
+### Use a configuration file
+
+As an alternative to command-line flags, `test.py`, `evaluate.py` and `benchmark.py` can read their options from a YAML file given with `--config`. Commented examples are in [configs/](configs/):
+
+```bash
+python test.py --config configs/test.yaml
+python evaluate.py --config configs/evaluate.yaml
+```
+
+The keys are the command-line flag names, e.g. `modelName`, `ckpt`, `dataPath` and `batchSize`. Flags given on the command line override the values in the file, which in turn override the defaults:
+
+```bash
+python evaluate.py --config configs/evaluate.yaml --gpus -1   # same settings, but on the CPU
+```
+
+Unknown keys and values of the wrong type stop the script with an error, so typos are not silently ignored. Relative paths are relative to the folder you run the command from.
+
+For `evaluate.py` and `benchmark.py`, the data options `dataRoot`, `dataPath`, `realPath` and `fakePath` can be set in the file like any other option. If any data option is given on the command line, all data options in the file, including the `datasets` list, are ignored, so `--dataRoot` on the command line works even if the file sets `dataPath`. If more than one data option is still set, the first one in this order is used and the script says which ones it ignored: `realPath` with `fakePath`, `dataPath`, `dataRoot`, the `datasets` list.
+
+To combine datasets laid out differently, such as one folder of real photos shared by several generators, list them in the file instead:
+
+```yaml
+datasets:
+  - real_path: /path/to/wang2020/biggan        # contains 0_real and 1_fake
+    fake_path: /path/to/wang2020/biggan
+    source: wang2020
+    generative_model: biggan
+  - real_path: /path/to/real_photos            # any folder of real images
+    fake_path: /path/to/sdxl_images            # any folder of fake images
+    source: my_data
+    family: diffusion
+    generative_model: stable-diffusion-xl
+```
+
+`real_path` and `fake_path` are required and follow the same rules as `--realPath` and `--fakePath`. `family` is looked up in [configs/families.yaml](configs/families.yaml) when not given.
 
 # Citation 
 

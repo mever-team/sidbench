@@ -62,12 +62,13 @@ class EvalOptions():
         self.initialized = False
 
     def initialize(self, parser):
-        parser.add_argument('--realPath', type=str, default=None, help='dir name of reals')
-        parser.add_argument('--fakePath', type=str, default=None, help='dir name of fakes')
-        parser.add_argument('--dataPath', type=str, default=None, help='dir name of all data')
-        parser.add_argument('--source',  default=None, help='wang2020, ojha2023, synthbuster')
-        parser.add_argument('--generativeModel',  default=None)
-        parser.add_argument('--family',  default=None, help='family of generative model: gan, deepfake, perceptual_loss, low_level_vision, diffusion')
+        parser.add_argument('--dataRoot', type=str, default=None, help='folder with one subfolder per generator, each containing 0_real and 1_fake folders; each generator is scored separately')
+        parser.add_argument('--dataPath', type=str, default=None, help='folder containing 0_real and 1_fake folders (can be nested), scored as one dataset')
+        parser.add_argument('--realPath', type=str, default=None, help='folder of real images, used with --fakePath; any folder and file names')
+        parser.add_argument('--fakePath', type=str, default=None, help='folder of fake images, used with --realPath; any folder and file names')
+        parser.add_argument('--source',  default=None, help="name of the dataset, saved with the results, e.g. wang2020. With --dataRoot it replaces the folder's name; with a 'datasets' list in a config file it runs only the entries with this source")
+        parser.add_argument('--generativeModel',  default=None, help='name of the generator of the fake images, saved with the results (for --dataPath and --realPath/--fakePath)')
+        parser.add_argument('--family',  default=None, help='type of generator, e.g. gan or diffusion, saved with the results; looked up in configs/families.yaml when not given')
         parser.add_argument('--maxSample', type=int, default=None, help='only check this number of images for both fake/real')
 
         parser.add_argument('--modelName', type=str, default='UnivFD', help='One of CNNDetect, FreDetect, Fusing, GramNet, LGrad, UnivFD, RPTC, Rine, DIMD, NPR')    

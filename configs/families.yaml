@@ -1,0 +1,48 @@
+# Family (type) of each generator, saved as 'family' with the results so they can be averaged per type,
+# e.g. all GANs vs all diffusion models (see scripts/create_averages.py).
+#
+# When a dataset entry has no family of its own, it is looked up here by its generative_model name,
+# which with --dataRoot is the name of the generator's folder. Names are matched ignoring upper/lower case;
+# generators not listed get family 'unknown'. To add a generator, add its folder name under its family,
+# or add a new family with its own list.
+
+gan:
+  - progan
+  - stylegan
+  - stylegan2
+  - biggan
+  - cyclegan
+  - stargan
+  - gaugan
+  - whichfaceisreal       # StyleGAN faces collected from whichfaceisreal.com
+
+deepfake:
+  - deepfake              # face-swap video frames (FaceForensics++)
+
+perceptual_loss:
+  - crn
+  - imle
+
+low_level_vision:          # networks that enhance a real photo rather than create a new image
+  - san                   # super-resolution
+  - seeingdark            # "Learning to See in the Dark" (folder name in the wang2020 download)
+  - sitd                  # the same method under its short name
+
+diffusion:
+  - dalle
+  - dalle2
+  - dalle3
+  - glide
+  - glide_100_10
+  - glide_100_27
+  - glide_50_27
+  - guided
+  - ldm_100
+  - ldm_200
+  - ldm_200_cfg
+  - stable-diffusion-1-3
+  - stable-diffusion-1-4
+  - stable-diffusion-2
+  - stable-diffusion-xl
+  - midjourney-v5
+  - firefly

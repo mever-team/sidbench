@@ -4,7 +4,7 @@ import json
 from numpyencoder import NumpyEncoder
 
 from dataset.dataset import SyntheticImagesDataset
-from dataset.dataset_paths import DATASET_PATHS
+from dataset.sources import build_datasets, DATASET_FIELDS, DATA_OPTIONS
 from dataset import patch_collate
 
 import shutil
@@ -18,6 +18,7 @@ from models import get_model
 from utils.evaluation_utils import calculate_performance_metrics
 
 from options import EvalOptions
+from options.config import parse_with_config
 from utils.util import set_random_seed, setup_device
 
 from dataset.process import processing
@@ -160,8 +161,8 @@ def run_for_model(datasets, model, opt):
     for dataset_params in datasets:
         set_random_seed()
 
-        data_paths = dataset_params['data_paths']
-        dataset = SyntheticImagesDataset(data_paths=data_paths, opt=opt, process_fn=processing)
+        dataset = SyntheticImagesDataset(real_list=dataset_params['real_images'], fake_list=dataset_params['fake_images'],
+                                         opt=opt, process_fn=processing)
 
         source = dataset_params.get('source', 'N/A') or 'N/A'
         generative_model = dataset_params.get('generative_model', 'N/A') or 'N/A'
@@ -190,35 +191,11 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser = EvalOptions().initialize(parser)
 
-    opt = parser.parse_args()
+    opt, config_lists = parse_with_config(parser, lists={'datasets': DATASET_FIELDS}, replace_groups=[DATA_OPTIONS])
+
+    datasets = build_datasets(opt, config_lists.get('datasets'))
 
     model = get_model(opt)
 
-    if (opt.realPath != None) and (opt.fakePath != None):
-        datasets = [ 
-            dict(data_paths=[opt.realPath, opt.fakePath], 
-                 source=opt.source,
-                 generative_model=opt.generativeModel,
-                 family=opt.family
-            )
-        ]
-    elif opt.dataPath != None:
-        datasets = [ 
-            dict(data_paths=[opt.dataPath], 
-                 source=opt.source,
-                 generative_model=opt.generativeModel,
-                 family=opt.family
-            )
-        ]
-    else:
-        dataset_paths = [dp for dp in DATASET_PATHS if dp['source'] == opt.source] if opt.source != None else DATASET_PATHS
-        datasets = [
-            dict(data_paths=[dp['real_path'], dp['fake_path']], 
-                 source=dp['source'],
-                 generative_model=dp['generative_model'],
-                 family=dp['family'])
-            for dp in dataset_paths
-        ]
-    
     run_for_model(datasets=datasets, model=model, opt=opt)
 

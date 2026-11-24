@@ -6,6 +6,7 @@ from dataset import patch_collate
 
 from models import get_model
 from options import TestOptions
+from options.config import parse_with_config
 import torch
 from tqdm import tqdm
 
@@ -18,7 +19,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser = TestOptions().initialize(parser)
 
-    opt = parser.parse_args()
+    opt, _ = parse_with_config(parser)
 
     print('model: ', opt.modelName)
     print('ckpt: ', opt.ckpt)

@@ -1,13 +1,15 @@
 import argparse
+import copy
+import os
 
-from models import get_model
+from models import get_model, VALID_MODELS
 from models.models import MODELS
 
-from dataset.dataset_paths import DATASET_PATHS
-
 from evaluate import run_for_model
+from dataset.sources import build_datasets, DATASET_FIELDS, DATA_OPTIONS
 
-from options import TestOptions
+from options import EvalOptions
+from options.config import parse_with_config
 from utils.util import set_random_seed
 
 SEED = 0
@@ -15,49 +17,60 @@ SEED = 0
 JPEG_QUALITY = [95, 90, 50, 30]
 GAUSSIAN_SIGMA = [2, 4]
 
+# Clean images, each JPEG quality, each blur level, then JPEG quality 50 combined with blur sigma 2
+DEGRADATIONS = (
+    [dict()]
+    + [dict(jpegQuality=jpeg_quality) for jpeg_quality in JPEG_QUALITY]
+    + [dict(gaussianSigma=gaussian_sigma) for gaussian_sigma in GAUSSIAN_SIGMA]
+    + [dict(jpegQuality=50, gaussianSigma=2)]
+)
+
+# Fields of each entry in the 'models' and 'degradations' lists of a config file: (types, required fields)
+MODEL_FIELDS = (dict(modelName=str, ckpt=str, trainedOn=str), {'modelName', 'ckpt', 'trainedOn'})
+DEGRADATION_FIELDS = (dict(jpegQuality=int, gaussianSigma=int), set())
+
 
 if __name__ == '__main__':
 
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-    parser = TestOptions().initialize(parser)
+    parser = EvalOptions().initialize(parser)
 
-    opt = parser.parse_args()
+    opt, config_lists = parse_with_config(
+        parser, lists={'datasets': DATASET_FIELDS, 'models': MODEL_FIELDS, 'degradations': DEGRADATION_FIELDS},
+        replace_groups=[DATA_OPTIONS]
+    )
 
-    datasets = [
-        dict(data_paths=[dp['real_path'], dp['fake_path']], 
-             source=dp['source'],
-             generative_model=dp['generative_model'],
-             family=dp['family'])
-        for dp in DATASET_PATHS
-    ]
+    if opt.jpegQuality is not None or opt.gaussianSigma is not None:
+        parser.error("benchmark.py sets jpegQuality and gaussianSigma itself; use the 'degradations' list in a config file instead")
 
-    for model_params in MODELS:
+    models = config_lists.get('models', MODELS)
+    degradations = config_lists.get('degradations', DEGRADATIONS)
+
+    seen = set()
+    for model_params in models:
+        if model_params['modelName'] not in VALID_MODELS:
+            parser.error(f"unknown modelName '{model_params['modelName']}'. Valid models: {', '.join(VALID_MODELS)}")
+        key = (model_params['modelName'], model_params['trainedOn'])
+        if key in seen:
+            parser.error(f'two models have modelName={key[0]} and trainedOn={key[1]}; their results would overwrite each other')
+        seen.add(key)
+
+    datasets = build_datasets(opt, config_lists.get('datasets'))
+
+    for model_params in models:
         set_random_seed()
-        print('Model: ', model_params['modelName'])
 
-        opt.modelName = model_params['modelName']
-        opt.ckpt = model_params['ckpt']
-        
-        model = get_model(opt)
+        # get_model() changes some options (e.g. LGrad sets cropSize=256), so each model gets its own copy
+        model_opt = copy.copy(opt)
+        model_opt.modelName = model_params['modelName']
+        model_opt.ckpt = model_params['ckpt']
+        # One folder per training set, so checkpoints of the same model don't overwrite each other's results
+        model_opt.resultFolder = os.path.join(opt.resultFolder, model_params['trainedOn'])
 
-        print('\tjpeg_quality: ', None, 'gaussian_sigma: ', None)
-        opt.gaussianSigma = None
-        opt.jpegQuality = None
-        run_for_model(datasets=datasets, model=model, opt=opt)
+        model = get_model(model_opt)
 
-        for jpeg_quality in JPEG_QUALITY:
-            print('\tjpeg_quality: ', jpeg_quality)
-            opt.gaussianSigma = None
-            opt.jpegQuality = jpeg_quality
-            run_for_model(datasets=datasets, model=model, opt=opt)
-        
-        for gaussian_sigma in GAUSSIAN_SIGMA:
-            print('\tgaussian_sigma: ', gaussian_sigma)
-            opt.gaussianSigma = gaussian_sigma
-            opt.jpegQuality = None
-            run_for_model(datasets=datasets, model=model, opt=opt)
-        
-        print('\tjpeg_quality: ', 50, 'gaussian_sigma: ', 2)
-        opt.gaussianSigma = 2
-        opt.jpegQuality = 50
-        run_for_model(datasets=datasets, model=model, opt=opt)
+        for degradation in degradations:
+            model_opt.jpegQuality = degradation.get('jpegQuality')
+            model_opt.gaussianSigma = degradation.get('gaussianSigma')
+            print('\tjpeg_quality: ', model_opt.jpegQuality, 'gaussian_sigma: ', model_opt.gaussianSigma)
+            run_for_model(datasets=datasets, model=model, opt=model_opt)
