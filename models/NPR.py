@@ -13,12 +13,18 @@ class NPR(nn.Module):
         return self.model(x)
 
     def load_weights(self, ckpt):
-        state_dict = torch.load(ckpt, map_location='cpu')
-        try:
-            self.model.load_state_dict(state_dict['model'], strict=False)
-        except:
-            print('Loading failed, trying to load model without module')
-            self.model.load_state_dict(state_dict)
+        checkpoint = torch.load(ckpt, map_location="cpu")
+
+        state_dict = checkpoint.get("model", checkpoint)
+
+        # Remove DataParallel prefix if present
+        if state_dict and all(k.startswith("module.") for k in state_dict):
+            state_dict = {
+                k.removeprefix("module."): v
+                for k, v in state_dict.items()
+            }
+
+        self.model.load_state_dict(state_dict, strict=True)
 
     def predict(self, img):
         with torch.no_grad():

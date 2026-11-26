@@ -1,0 +1,70 @@
+# Settings for evaluate.py: measure how well a detector separates real from fake images.
+#
+#   python evaluate.py --config configs/evaluate.yaml
+#
+# Flags on the command line override these values, e.g. add --gpus -1 to run on the CPU.
+# Keys are the command-line flag names; `python evaluate.py --help` lists every option.
+# Relative paths are relative to the folder you run the command from.
+
+# Where the images are. Set one of these (if several are set, the first one in this order is used:
+# realPath + fakePath, dataPath, dataRoot, the datasets list at the end of this file).
+# Any of them given on the command line replaces all of them here, e.g. --dataPath ignores dataRoot.
+#
+# dataRoot: a dataset with one subfolder per generator, each containing 0_real and 1_fake folders
+#           (they can be nested, e.g. progan/car/0_real). Each generator gets its own row in the results.
+# dataPath: one folder containing 0_real and 1_fake folders, scored as a single dataset.
+# realPath + fakePath: any folder of real images and any folder of fake images.
+dataRoot: path/to/dataset
+dataPath: null
+realPath: null
+fakePath: null
+
+# Labels saved with the results (optional).
+# source: name of the dataset. With dataRoot it defaults to the folder's name.
+# family: type of generator, looked up in configs/families.yaml when null.
+# generativeModel: name of the generator, for dataPath or realPath + fakePath (dataRoot uses the folder names).
+source: null
+generativeModel: null
+family: null
+
+# Detector and its pretrained weights (the README lists the models and weight files)
+modelName: UnivFD
+ckpt: ./weights/univfd/fc_weights.pth
+
+# Results go to <resultFolder>/<modelName>/<preprocessing settings>/
+resultFolder: results
+
+# Resize images to loadSize x loadSize (null = no resizing), then crop the centre to cropSize.
+# CLIP-based models (UnivFD, Rine) need 224 input.
+loadSize: 256
+cropSize: 224
+
+# Optional degradations to test robustness, e.g. jpegQuality: 50 or gaussianSigma: 2
+jpegQuality: null
+gaussianSigma: null
+
+# Use at most this many real and this many fake images (null = all)
+maxSample: null
+
+# GPU id, or -1 for the CPU
+gpus: 0
+batchSize: 64
+numThreads: 4
+
+# To combine folders laid out differently, e.g. one folder of real photos shared by several generators,
+# set the options above to null and list each dataset here; each gets its own row in the results.
+# When real_path and fake_path are the same folder, it needs 0_real and 1_fake folders inside it.
+# When they are different folders, every image in real_path counts as real and every image in fake_path
+# as fake. family is looked up in configs/families.yaml when not given.
+# Setting source above then runs only the entries with that source.
+#
+# datasets:
+#   - real_path: path/to/dataset_a
+#     fake_path: path/to/dataset_a
+#     source: my_data
+#     generative_model: stylegan2
+#   - real_path: path/to/real_photos
+#     fake_path: path/to/stable_diffusion_images
+#     source: my_data
+#     family: diffusion
+#     generative_model: stable-diffusion-xl

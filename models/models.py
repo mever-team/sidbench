@@ -69,8 +69,8 @@ MODELS = [
     },
         {
         "modelName": "Dire",
-        "trainedOn": "progan",
-        "ckpt": "./weights/gramnet/Gram.pth"
+        "trainedOn": "adm",
+        "ckpt": "./weights/dire/lsun_adm.pth"
     }
 ]
 

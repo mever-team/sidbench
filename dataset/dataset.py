@@ -36,26 +36,42 @@ def gaussian_blur(img, sigma):
     return Image.fromarray(img)
 
 
-def get_list(path, must_contain='', exts=["png", "jpg", "JPEG", "jpeg", "bmp"]):
-    image_list = [] 
+IMAGE_EXTENSIONS = ('.png', '.jpg', '.jpeg', '.bmp')
+
+
+def get_list(path, exts=IMAGE_EXTENSIONS):
+    """All images under path, searching every subfolder, sorted."""
+    image_list = []
     for r, _, f in os.walk(path):
         for file in f:
-            if (file.split('.')[1] in exts) and (must_contain in os.path.join(r, file)):
+            # The extension is the part after the last dot, in any case: img.v2.PNG -> .png
+            if os.path.splitext(file)[1].lower() in exts:
                 image_list.append(os.path.join(r, file))
 
-    return image_list
+    return sorted(image_list)
+
+
+def sample(images, max_sample):
+    """A random max_sample of the images (all of them if max_sample is None), without changing the list given."""
+    images = list(images)
+    if max_sample is not None and max_sample < len(images):
+        random.shuffle(images)
+        images = images[:max_sample]
+    return images
 
 
 class SyntheticImagesDataset(Dataset):
-    def __init__(self, data_paths, opt, process_fn):    
+    def __init__(self, real_list, fake_list, opt, process_fn):
+        """real_list and fake_list are the image paths, e.g. from dataset.sources.list_images()."""
 
         self.jpeg_quality = opt.jpegQuality
         self.gaussian_sigma = opt.gaussianSigma
-        
+
         self.opt = opt
         self.process_fn = process_fn
 
-        self.real_list, self.fake_list = self.read_paths(data_paths, opt.maxSample)
+        self.real_list = sample(real_list, opt.maxSample)
+        self.fake_list = sample(fake_list, opt.maxSample)
         self.total_list = self.real_list + self.fake_list
 
         # labels
@@ -93,22 +109,6 @@ class SyntheticImagesDataset(Dataset):
         for i in self.fake_list:
             self.labels_dict[i] = 1
 
-    def read_paths(self, paths, max_sample=None):
-        real_list = []
-        fake_list = []
-        for pth in set(paths):
-            real_list += get_list(pth, must_contain='0_real')
-            fake_list += get_list(pth, must_contain='1_fake')
-
-        if max_sample is not None:
-            random.shuffle(real_list)
-            real_list = real_list[0:max_sample] if max_sample < len(real_list) else real_list
-
-            random.shuffle(fake_list)
-            fake_list = fake_list[0:max_sample] if max_sample < len(fake_list) else fake_list
-
-        return real_list, fake_list
-    
     def real_len(self):
         return len(self.real_list)
     
@@ -147,12 +147,9 @@ class RecursiveImageDataset(Dataset):
         self.image_paths = []
         self._load_image_paths(data_path)
 
-    def _load_image_paths(self, dir_path, exts=("png", "jpg", "jpeg", "bmp")):
+    def _load_image_paths(self, dir_path):
         """Recursively load all image paths from the directory."""
-        for root, _, filenames in os.walk(dir_path):
-            for filename in filenames:
-                if filename.lower().endswith(exts):
-                    self.image_paths.append(os.path.join(root, filename))
+        self.image_paths.extend(get_list(dir_path))
 
     def __len__(self):
         return len(self.image_paths)

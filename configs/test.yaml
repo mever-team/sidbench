@@ -1,0 +1,27 @@
+# Settings for test.py: run one detector on a folder of images and save a prediction for each image.
+#
+#   python test.py --config configs/test.yaml
+#
+# Flags on the command line override these values, e.g. add --gpus -1 to run on the CPU.
+# Keys are the command-line flag names; `python test.py --help` lists every option.
+# Relative paths are relative to the folder you run the command from.
+
+# Folder of images to classify, searched recursively for .png, .jpg, .jpeg and .bmp files
+dataPath: path/to/images
+
+# Detector and its pretrained weights (the README lists the models and weight files)
+modelName: UnivFD
+ckpt: ./weights/univfd/fc_weights.pth
+
+# CSV file for the predictions: image path, score (closer to 1 = more likely fake) and predicted label
+predictionsFile: predictions.csv
+
+# Resize images to loadSize x loadSize (null = no resizing), then crop the centre to cropSize.
+# CLIP-based models (UnivFD, Rine) need 224 input.
+loadSize: null
+cropSize: 224
+
+# GPU id, or -1 for the CPU
+gpus: 0
+batchSize: 64
+numThreads: 1
